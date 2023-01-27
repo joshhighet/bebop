@@ -1,0 +1,25 @@
+FROM debian:latest
+
+LABEL org.opencontainers.image.title bebop
+LABEL org.opencontainers.image.authors @joshhighet
+LABEL org.opencontainers.image.base.name ghcr.io/joshhighet/bebop:latest
+LABEL org.opencontainers.image.description scanner
+LABEL org.opencontainers.image.documentation https://github.com/joshhighet/bebop#readme
+LABEL org.opencontainers.image.url https://github.com/joshhighet/bebop/pkgs/container/bebop
+LABEL org.opencontainers.image.source https://github.com/joshhighet/bebop/blob/main/bebop/dockerfile
+
+ARG SOCKS_PORT=9050
+ARG SOCKS_HOST=10.4.4.4
+ENV PYTHONUNBUFFERED True
+ENV APP_HOME /app
+
+WORKDIR $APP_HOME
+COPY . ./
+RUN sed -i "s/127.0.0.1/$SOCKS_HOST/g" proxychains.conf
+RUN sed -i "s/9050/$SOCKS_PORT/g" proxychains.conf
+
+RUN apt update --yes
+RUN apt install --yes proxychains-ng nmap python3-pip jq
+RUN pip3 install --no-cache-dir -r requirements.txt
+
+ENTRYPOINT ["python3", "main.py"]
