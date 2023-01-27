@@ -1,0 +1,7 @@
+yq
+mmh3
+lxml
+shodan
+tldextract
+BeautifulSoup4
+requests[socks]
