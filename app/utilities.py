@@ -11,7 +11,7 @@ from urllib.parse import urlparse
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s %(message)s')
 
-socksaddr = os.environ.get('SOCKS_HOST', '127.0.0.1')
+socksaddr = os.environ.get('SOCKS_HOST', 'host.docker.internal')
 socksport = os.environ.get('SOCKS_PORT', 9050)
 
 file_checks = ['proxychains.conf', 'common/headers.txt']

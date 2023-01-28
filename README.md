@@ -53,7 +53,7 @@ leverage any existing infrastructure, create your own or follow one of the below
     docker compose --file multisocks/docker-compose.yml up --detach
     ```
     
-by default, the proxy location is set to `127.0.0.1:9050` - this can be overwrote through environment variables, refer to the `building` section for more
+by default, the proxy location is set to `host.docker.internal:9050` - this can be overwrote through environment variables, refer to the `building` section for more
 
 ### dockerfile
 
@@ -153,4 +153,18 @@ if you have already built the image locally, run
 
 ```shell
 docker run bebop facebookwkhpilnemxj7asaniu7vnjjbiltxjqhye3mhbshg7kx5tfyd.onion
+```
+
+run from ghcr with the below
+
+unless specified (like below) the SOCKS5 proxy will default to `host.docker.internal:9050`
+
+if no `SHODAN_API_KEY` var is supplied searches will be skipped
+
+```shell
+docker run \
+-e SOCKS_HOST=yourproxy.fqdn \
+-e SOCKS_PORT=9050 \
+-e SHODAN_API_KEY=yourkey \
+ghcr.io/joshhighet/bebop:latest http://test-web.busmori.com
 ```
