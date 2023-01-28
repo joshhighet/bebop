@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+import re
 import os
 import sys
 import shutil
@@ -23,6 +24,24 @@ def checktcp(host, port):
     if result == 0:
         return True
     return False
+
+def nsresolve(fqdn):
+    try:
+        return socket.gethostbyname(fqdn)
+    except socket.gaierror:
+        return None
+
+def gen_chainconfig(socksaddr, socksport):
+    fqdnrex = re.compile(r'^[a-zA-Z0-9\-\.]+\.[a-zA-Z]{2,5}$')
+    if fqdnrex.match(socksaddr):
+        socksaddr = nsresolve(socksaddr)
+    confstr = 'socks4 ' + socksaddr + ' ' + str(socksport)
+    with open('proxychains.conf', 'r') as f:
+        if 'socks4' not in f.read():
+            with open('proxychains.conf', 'a') as f:
+                f.write(confstr)
+        else:
+            logging.debug('socks4 already configured in proxychains.conf')
 
 def getfqdn(url):
     url_object = tldextract.extract(url)

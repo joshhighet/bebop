@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+import os
 import logging
 import argparse
 
@@ -12,7 +13,7 @@ import torscan
 import configcheck
 import opendir
 import shodansearch
-from utilities import preflight, getfqdn, getbaseurl
+from utilities import preflight, getfqdn, getbaseurl, gen_chainconfig
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s %(message)s')
 
@@ -28,6 +29,10 @@ url_base = getbaseurl(url)
 logging.debug('fqdn: {}'.format(fqdn))
 logging.debug('url: {}'.format(url))
 logging.debug('url_base: {}'.format(url_base))
+
+socksaddr = os.environ.get('SOCKS_HOST', '127.0.0.1')
+socksport = os.environ.get('SOCKS_PORT', 9050)
+gen_chainconfig('telemetry.dark', socksport)
 
 requestobject = getpage.main(args.target)
 header_data = headers.main(requestobject)
