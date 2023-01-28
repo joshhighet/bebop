@@ -7,7 +7,7 @@ import sys
 import logging
 import requests
 
-from utilities import getsocks, checktcp
+from utilities import getsocks
 
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s %(levelname)s %(message)s')
 requests.packages.urllib3.disable_warnings()
