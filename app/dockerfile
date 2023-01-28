@@ -21,7 +21,5 @@ ENV APP_HOME /app
 WORKDIR $APP_HOME
 COPY . ./
 RUN pip3 install --no-cache-dir -r requirements.txt
-RUN sed -i "s/127.0.0.1/$SOCKS_HOST/g" proxychains.conf
-RUN sed -i "s/9050/$SOCKS_PORT/g" proxychains.conf
 
 ENTRYPOINT ["python3", "main.py"]
