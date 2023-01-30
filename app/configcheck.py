@@ -23,8 +23,8 @@ def main(location):
         if page is None:
             logging.error('no response from {}'.format(location + path['uri']))
             continue
-        page_title = title.main(page)
         if page.status_code == path['code']:
+            title.main(page)
             if path['text'] is None:
                 logging.info('found {} at {}'.format(path['code'], location + path['uri']))
             else:
