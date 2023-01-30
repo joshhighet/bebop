@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 import os
-import sys
 import shodan
 import logging
 
@@ -29,11 +28,15 @@ def query(query, is_favicon=False):
     try:
         if is_favicon:
             query = 'http.favicon.hash:{}'.format(query)
-        logging.info('shodan: querying "{}"'.format(query))
+        logging.info('shodan: querying "%s"', query)
         results = api.search(query)
-        logging.info('shodan: found {} results'.format(results['total']))
+        logging.info('shodan: found %s results', results['total'])
+        if results['total'] > 20:
+            logging.warning('shodan: a large number of findings here is abnormal. review results carefully!')
         for result in results['matches']:
             findings.append(result)
+            logging.info('shodan: found %s', result['ip_str'])
+            logging.debug('shodan: %s', result['data'])
     except shodan.APIError as sae:
-        logging.error('shodan: api error: {}'.format(sae))
+        logging.error('shodan: api error: %s', sae)
     return findings
