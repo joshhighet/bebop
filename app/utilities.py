@@ -11,8 +11,17 @@ from urllib.parse import urlparse
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s %(message)s')
 
-socksaddr = os.environ.get('SOCKS_HOST', 'host.docker.internal')
+def nsresolve(fqdn):
+    try:
+        return socket.gethostbyname(fqdn)
+    except socket.gaierror:
+        return None
+
 socksport = os.environ.get('SOCKS_PORT', 9050)
+if nsresolve('host.docker.internal') is not None:
+    socksaddr = os.environ.get('SOCKS_HOST', 'host.docker.internal')
+else:
+    socksaddr = os.environ.get('SOCKS_HOST', 'localhost')
 
 file_checks = ['proxychains.conf', 'common/headers.txt']
 path_checks = ['proxychains4','nmap']
@@ -24,12 +33,6 @@ def checktcp(host, port):
     if result == 0:
         return True
     return False
-
-def nsresolve(fqdn):
-    try:
-        return socket.gethostbyname(fqdn)
-    except socket.gaierror:
-        return None
 
 def gen_chainconfig(socksaddr, socksport):
     fqdnrex = re.compile(r'^[a-zA-Z0-9\-\.]+\.[a-zA-Z]{2,5}$')
@@ -69,9 +72,9 @@ def preflight():
     for path_item in path_checks:
         check = shutil.which(path_item)
         if check is None:
-            print('{} not found'.format(path_item))
+            logging.critical('{} not found'.format(path_item))
             sys.exit(1)
     for file in file_checks:
         if not os.path.isfile(file):
-            print('{} not found'.format(file))
+            logging.critical('{} not found'.format(file))
             sys.exit(1)
