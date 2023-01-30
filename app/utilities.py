@@ -35,14 +35,18 @@ def checktcp(host, port):
     return False
 
 def gen_chainconfig(socksaddr, socksport):
+    if not checktcp(socksaddr, socksport):
+        logging.critical('failed socks5 preflight socket check (%s:%s)', socksaddr, socksport)
+        sys.exit(1)
     fqdnrex = re.compile(r'^[a-zA-Z0-9\-\.]+\.[a-zA-Z]{2,5}$')
     if fqdnrex.match(socksaddr):
         socksaddr = nsresolve(socksaddr)
     confstr = 'socks4 ' + socksaddr + ' ' + str(socksport)
-    with open('proxychains.conf', 'r') as f:
-        if 'socks4' not in f.read():
-            with open('proxychains.conf', 'a') as f:
-                f.write(confstr)
+    with open('proxychains.conf', 'r', encoding='utf-8') as chainconf:
+        contents = chainconf.read()
+        if 'socks4' not in contents:
+            with open('proxychains.conf', 'a', encoding='utf-8') as chainconf:
+                chainconf.write(confstr)
         else:
             logging.debug('socks4 already configured in proxychains.conf')
 
@@ -57,10 +61,10 @@ def getbaseurl(url):
     if urlparse_object.path == '':
         return url
     return urlparse_object.scheme + '://' + urlparse_object.netloc
-    
+
 def getsocks():
     if not checktcp(socksaddr, socksport):
-        logging.critical('failed socks5 preflight socket check (' + socksaddr + ':' + str(socksport) + ' unreachable)')
+        logging.critical('failed socks5 preflight socket check (%s:%s)', socksaddr, socksport)
         sys.exit(1)
     oproxies = {
         'http':  'socks5h://' + socksaddr + ':' + str(socksport),
@@ -72,9 +76,9 @@ def preflight():
     for path_item in path_checks:
         check = shutil.which(path_item)
         if check is None:
-            logging.critical('{} not found'.format(path_item))
+            logging.critical('%f not found in path', path_item)
             sys.exit(1)
     for file in file_checks:
         if not os.path.isfile(file):
-            logging.critical('{} not found'.format(file))
+            logging.critical('%f not found', file)
             sys.exit(1)
