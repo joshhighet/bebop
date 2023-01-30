@@ -13,6 +13,6 @@ directory_strings = [
 def main(requestobject):
     for item in directory_strings:
         if item in requestobject.text:
-            logging.info('potential open directory - {}'.format(requestobject.url))
+            logging.info('potential open directory - %s', requestobject.url)
         else:
-            logging.debug('{} does not appear to be an open directory'.format(requestobject.url))
+            logging.debug('%s does not appear to be an open directory', requestobject.url)

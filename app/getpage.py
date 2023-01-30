@@ -1,9 +1,5 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-'''
-requests and returns a request object
-'''
-import sys
 import logging
 import requests
 
@@ -17,7 +13,7 @@ def main(weblocation, usetor=True):
         reqproxies = getsocks()
     else:
         reqproxies = None
-    logging.info('making request to: {} - tor:{}'.format(weblocation, usetor))
+    logging.debug('making request to: %s - tor:%s', weblocation, usetor)
     try:
         siterequest = requests.get(
             weblocation,
@@ -25,14 +21,11 @@ def main(weblocation, usetor=True):
             verify=False,
             timeout=30
         )
-        logging.info('request took: {} seconds'.format(siterequest.elapsed.total_seconds()))
+        logging.debug('request took: %s seconds', siterequest.elapsed.total_seconds())
     except requests.exceptions.ConnectionError as rece:
         logging.error(rece)
         return None
     except requests.exceptions.Timeout as ret:
         logging.error(ret)
         return None
-    except Exception as gene:
-        logging.critical('unknown error: {}'.format(gene))
-        sys.exit(1)
     return siterequest
