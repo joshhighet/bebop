@@ -24,7 +24,11 @@ def main(siterequest):
                 data['cookies'].append(siterequest.headers[hedr])
                 continue
             if hedr.lower() == 'etag' or hedr.lower() == 'e-tag':
-                data['etag'] = siterequest.headers[hedr]
+                if siterequest.headers[hedr].startswith('W/'):
+                    logging.warn('the etag found is tagged as a weak validator')
+                    data['etag'] = siterequest.headers[hedr].replace('W/', '').strip('"')
+                else:
+                    data['etag'] = siterequest.headers[hedr].strip('"')
                 continue
             if hedr.lower() == 'server':
                 data['server'] = siterequest.headers[hedr]
