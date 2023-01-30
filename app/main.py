@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 import os
+import sys
 import logging
 import argparse
 
@@ -35,12 +36,17 @@ socksport = os.environ.get('SOCKS_PORT', 9050)
 gen_chainconfig('telemetry.dark', socksport)
 
 requestobject = getpage.main(args.target)
+if requestobject is None:
+    logging.error('failed to retrieve page')
+    sys.exit(1)
+title_data = title.main(requestobject)
 header_data = headers.main(requestobject)
-print(header_data)
+pagespider_data = pagespider.main(args.target, requestobject)
+for item in pagespider_data['internal']:
+    opendir_data = opendir.main(getpage.main(item))
 favicon_data = favicon.main(url_base, requestobject)
 if favicon_data is not None:
-    print('favicon mmh3: {}'.format(favicon_data))
-    favicon_correlations = shodansearch.favicon(favicon_data)
+    favicon_correlations = shodansearch.query(favicon_data, is_favicon=True)
     if len(favicon_correlations) > 50:
         logging.error('supressing - too many favicon correlations ({}).'.format(len(favicon_correlations)))
     if len(favicon_correlations) > 0:
@@ -49,15 +55,11 @@ if favicon_data is not None:
             print(correlation['ip_str'])
             print(correlation['data'])
 if header_data['etag'] is not None:
-    etag_correlations = shodansearch.general(header_data['etag'])
+    etag_correlations = shodansearch.query(header_data['etag'])
     if len(etag_correlations) > 0:
         print('found {} etag correlations'.format(len(etag_correlations)))
         for correlation in etag_correlations:
             print(correlation['ip_str'])
             print(correlation['data'])
-pagespider_data = pagespider.main(args.target, requestobject)
-for item in pagespider_data['internal']:
-    opendir_data = opendir.main(getpage.main(item))
 configcheck_data = configcheck.main(args.target)
-title_data = title.main(requestobject)
 torscan_data = torscan.main(fqdn)
