@@ -6,6 +6,7 @@ import logging
 from bs4 import BeautifulSoup
 
 import getpage
+import shodansearch
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s %(message)s')
 
@@ -27,17 +28,18 @@ def main(domain, requestobject):
     if 'image/x-icon' not in location:
         favicondata = getpage.main(location)
         if favicondata is None:
-            logging.info('favicon site ({}) returned no response'.format(location))
+            logging.info('favicon site (%s) returned no response', location)
             return faviconmmh3
         if favicondata.status_code != 200:
-            logging.info('favicon site ({}) returned status code {}'.format(location, favicondata.status_code))
+            logging.info('favicon site (%s) returned status code %s', \
+                location, favicondata.status_code)
             return faviconmmh3
-        logging.info('favicon location: {}'.format(location))
+        logging.info('favicon location: %s', location)
         favicon64 = codecs.encode(favicondata.content,"base64")
     else:
         logging.info('favicon is encoded in html')
         favicon64 = location[22:]
-        logging.debug('favicon64: {}'.format(favicon64))
+        logging.debug('favicon64: %s', favicon64)
     faviconmmh3 = mmh3.hash(favicon64)
-    logging.info('favicon mmh3: {}'.format(faviconmmh3))
+    logging.info('favicon mmh3: %s', faviconmmh3)
     return faviconmmh3
