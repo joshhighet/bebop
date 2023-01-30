@@ -22,11 +22,13 @@ def main(url, siterequest):
             if not re.search(r'\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}', link['href']):
                 link_parsed = urllib.parse.urlparse(link['href'])
                 link_domain = link_parsed.netloc
-                if domain in link['href'] or (link_domain.startswith("www.") and link_domain[4:] == domain[4:]):
-                    loggiing.info('link: ' + link['href'])
+                if domain in link['href'] or \
+                    (link_domain.startswith("www.") \
+                        and link_domain[4:] == domain[4:]):
+                    logging.debug('link: %s', link['href'])
                     links.append(link['href'])
                 else:
-                    logging.info('external link: ' + link['href'])
+                    logging.debug('external link: %s', link['href'])
                     external_links.append(link['href'])
         else:
             links.append(urljoin(url,link['href']))
@@ -36,4 +38,6 @@ def main(url, siterequest):
         logging.debug('did not find any external links')
     dedup_links = list(set(links))
     dedup_external_links = list(set(external_links))
+    logging.info('found %s internal links', len(dedup_links))
+    logging.info('found %s external links', len(dedup_external_links))
     return {'internal': dedup_links, 'external': dedup_external_links}
