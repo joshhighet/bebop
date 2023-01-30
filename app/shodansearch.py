@@ -18,33 +18,22 @@ with open('common/favicon-hashes.txt', 'r', encoding='utf-8') as common_hashes_f
         common_hashes.append(line.strip())
     common_hashes_file.close()
 
-def favicon(mmh3hash):
+def query(query, is_favicon=False):
     findings = []
     if not SHODAN_API_KEY:
-        logging.info('no shodan api key to search with!')
+        logging.info('shodan: missing api key to search with!')
         return findings
-    if mmh3hash in common_hashes:
+    if is_favicon and query in common_hashes:
         logging.info('favicon hash found in common hashes list, not searching shodan')
         return findings
     try:
-        results = api.search('http.favicon.hash:' + str(mmh3hash))
-        logging.info('found {} results querying shodan'.format(results['total']))
-        for result in results['matches']:
-            findings.append(result)
-    except shodan.APIError as sae:
-        print('shodan api error: {}'.format(sae))
-    return findings
-
-def general(query):
-    findings = []
-    if not SHODAN_API_KEY:
-        logging.info('no shodan api key to search with!')
-        return findings
-    try:
+        if is_favicon:
+            query = 'http.favicon.hash:{}'.format(query)
+        logging.info('shodan: querying "{}"'.format(query))
         results = api.search(query)
-        logging.info('found {} results querying shodan'.format(results['total']))
+        logging.info('shodan: found {} results'.format(results['total']))
         for result in results['matches']:
             findings.append(result)
     except shodan.APIError as sae:
-        print('shodan api error: {}'.format(sae))
+        logging.error('shodan: api error: {}'.format(sae))
     return findings
