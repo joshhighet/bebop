@@ -10,7 +10,6 @@ import getpage
 logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s %(message)s')
 
 def main(domain, requestobject):
-    # if domain ends with a slash, remove it
     domain = domain.rstrip('/')
     faviconmmh3 = None
     if 'http' not in domain:
@@ -25,11 +24,20 @@ def main(domain, requestobject):
         location = icon_link["href"]
     if 'http' not in location:
         location = domain + location
-    print('favicon location: {}'.format(location))
-    favicondata = getpage.main(location)
-    if favicondata.status_code != 200:
-        print('favicon site returned status code {}'.format(favicondata.status_code))
-        return faviconmmh3
-    favicon64 = codecs.encode(favicondata.content,"base64")
+    if 'image/x-icon' not in location:
+        favicondata = getpage.main(location)
+        if favicondata is None:
+            logging.info('favicon site ({}) returned no response'.format(location))
+            return faviconmmh3
+        if favicondata.status_code != 200:
+            logging.info('favicon site ({}) returned status code {}'.format(location, favicondata.status_code))
+            return faviconmmh3
+        logging.info('favicon location: {}'.format(location))
+        favicon64 = codecs.encode(favicondata.content,"base64")
+    else:
+        logging.info('favicon is encoded in html')
+        favicon64 = location[22:]
+        logging.debug('favicon64: {}'.format(favicon64))
     faviconmmh3 = mmh3.hash(favicon64)
+    logging.info('favicon mmh3: {}'.format(faviconmmh3))
     return faviconmmh3
