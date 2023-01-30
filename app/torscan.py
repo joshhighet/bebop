@@ -3,11 +3,18 @@
 '''
 builds nmap response
 '''
+import os
 import json
 import logging
 import subprocess
 
+from utilities import gen_chainconfig
+
 logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s %(message)s')
+
+socksaddr = os.environ.get('SOCKS_HOST', 'host.docker.internal')
+socksport = os.environ.get('SOCKS_PORT', 9050)
+gen_chainconfig(socksaddr, socksport)
 
 def commandgen(fqdn, usetor=True, max_scanport=10, useragent='Mozilla'):
     basecmd='\
@@ -59,27 +66,21 @@ def portdata(port):
                         portinf['shellauthmethods'].append('password')
                     if 'keyboard-interactive' in script['@output']:
                         portinf['shellauthmethods'].append('keyboard-interactive')
-            except TypeError as te:
-                logging.debug('failed to parse banner script')
-                logging.debug(te)
+            except TypeError:
+                logging.debug('failed to parse banner script: %f', TypeError)
                 logging.debug(script)
     return portinf
 
 def main(fqdn):
-    scanobj = {
-        'args': None,
-        'ports': None,
-        'time': None
-    }
     command = commandgen(fqdn)
+    logging.info('commencing portscan')
+    logging.debug('command: %s', command)
     output = subprocess.run(command, shell=True, capture_output=True, text=True, check=True)
-    out_json = output.stdout
-    logging.debug(out_json)
-    scanout = json.loads(out_json)
+    scanout = json.loads(output.stdout)
     scanobj['args'] = scanout['nmaprun']['@args']
     if 'host' not in scanout['nmaprun']:
         logging.debug('no open ports')
-        return
+        return scanobj
     portarr = scanout['nmaprun']['host']['ports']['port']
     logging.debug(scanout['nmaprun']['@args'])
     if scanout['nmaprun']['host']['status']['@state'] == 'up':
