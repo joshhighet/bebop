@@ -27,39 +27,22 @@ url = args.target
 fqdn = getfqdn(url)
 url_base = getbaseurl(url)
 
-logging.debug('fqdn: {}'.format(fqdn))
-logging.debug('url: {}'.format(url))
-logging.debug('url_base: {}'.format(url_base))
-
-socksaddr = os.environ.get('SOCKS_HOST', 'host.docker.internal')
-socksport = os.environ.get('SOCKS_PORT', 9050)
-gen_chainconfig('telemetry.dark', socksport)
-
 requestobject = getpage.main(args.target)
 if requestobject is None:
     logging.error('failed to retrieve page')
     sys.exit(1)
-title_data = title.main(requestobject)
+title.main(requestobject)
 header_data = headers.main(requestobject)
-pagespider_data = pagespider.main(args.target, requestobject)
-for item in pagespider_data['internal']:
-    opendir_data = opendir.main(getpage.main(item))
+if header_data['etag'] is not None:
+    etag_correlations = shodansearch.query(header_data['etag'])
 favicon_data = favicon.main(url_base, requestobject)
 if favicon_data is not None:
     favicon_correlations = shodansearch.query(favicon_data, is_favicon=True)
-    if len(favicon_correlations) > 50:
-        logging.error('supressing - too many favicon correlations ({}).'.format(len(favicon_correlations)))
-    if len(favicon_correlations) > 0:
-        print('found {} favicon correlations'.format(len(favicon_correlations)))
-        for correlation in favicon_correlations:
-            print(correlation['ip_str'])
-            print(correlation['data'])
-if header_data['etag'] is not None:
-    etag_correlations = shodansearch.query(header_data['etag'])
-    if len(etag_correlations) > 0:
-        print('found {} etag correlations'.format(len(etag_correlations)))
-        for correlation in etag_correlations:
-            print(correlation['ip_str'])
-            print(correlation['data'])
-configcheck_data = configcheck.main(args.target)
-torscan_data = torscan.main(fqdn)
+configcheck.main(args.target)
+torscan.main(fqdn)
+pagespider_data = pagespider.main(args.target, requestobject)
+for item in pagespider_data['internal']:
+    if '?' not in item:    
+        itemsource = getpage.main(item)
+        if itemsource is not None:
+            opendir.main(itemsource)
