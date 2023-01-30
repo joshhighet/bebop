@@ -4,6 +4,8 @@
 import getpage
 import logging
 
+import title
+
 logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s %(message)s')
 
 interesting_paths = [
@@ -14,16 +16,21 @@ interesting_paths = [
 ]
 
 def main(location):
+    if location.endswith('/'):
+        location = location[:-1]
     for path in interesting_paths:
         page = getpage.main(location + path['uri'])
+        if page is None:
+            logging.error('no response from {}'.format(location + path['uri']))
+            continue
+        page_title = title.main(page)
         if page.status_code == path['code']:
-            # if we have text to match, check it
             if path['text'] is None:
-                print('found {} at {}'.format(path['code'], location + path['uri']))
+                logging.info('found {} at {}'.format(path['code'], location + path['uri']))
             else:
                 if path['text'] in page.text:
-                    print('found {} at {}'.format(path['code'], location + path['uri']))
+                    logging.info('found {} at {}'.format(path['code'], location + path['uri']))
                 else:
-                    print('found {} at {} but no match for {}'.format(path['code'], location + path['uri'], path['text']))
+                    logging.debug('found {} at {} but no match for {}'.format(path['code'], location + path['uri'], path['text']))
         else:
-            print('found {} at {}'.format(page.status_code, location + path['uri']))
+            logging.debug('found {} at {}'.format(page.status_code, location + path['uri']))
