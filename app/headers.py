@@ -19,6 +19,7 @@ def main(siterequest):
     }
     for hedr in siterequest.headers:
         if hedr.lower() not in common_headers:
+            logging.info('header: ' + hedr + ' ' + siterequest.headers[hedr])
             if hedr.lower() == 'set-cookie':
                 data['cookies'].append(siterequest.headers[hedr])
                 continue
@@ -29,4 +30,6 @@ def main(siterequest):
                 data['server'] = siterequest.headers[hedr]
                 continue
             data['interesting_headers'].append(hedr + ':' + siterequest.headers[hedr])
+        else:
+            logging.debug('header: ' + hedr + ' ' + siterequest.headers[hedr])
     return data

@@ -87,8 +87,11 @@ def main(fqdn):
         if isinstance(portarr, list):
             for port in portarr:
                 scanobj['ports'].append(portdata(port))
+                logging.info('found port: %s', str(port['@portid']))
         else:
             scanobj['ports'].append(portdata(portarr))
+    else:
+        logging.debug('no open ports discovered')
     scanobj['time'] = int(float(scanout['nmaprun']['runstats']['finished']['@elapsed']))
     logging.debug(scanout)
-    print(json.dumps(scanobj, indent=4, sort_keys=True))
+    return scanobj

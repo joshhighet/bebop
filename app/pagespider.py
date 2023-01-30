@@ -23,11 +23,17 @@ def main(url, siterequest):
                 link_parsed = urllib.parse.urlparse(link['href'])
                 link_domain = link_parsed.netloc
                 if domain in link['href'] or (link_domain.startswith("www.") and link_domain[4:] == domain[4:]):
+                    loggiing.info('link: ' + link['href'])
                     links.append(link['href'])
                 else:
+                    logging.info('external link: ' + link['href'])
                     external_links.append(link['href'])
         else:
             links.append(urljoin(url,link['href']))
+    if not links:
+        logging.debug('did not find any internal links')
+    if not external_links:
+        logging.debug('did not find any external links')
     dedup_links = list(set(links))
     dedup_external_links = list(set(external_links))
     return {'internal': dedup_links, 'external': dedup_external_links}

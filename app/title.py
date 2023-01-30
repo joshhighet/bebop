@@ -8,4 +8,4 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s %(mess
 def main(requestobject):
     soup = BeautifulSoup(requestobject.text, 'html.parser')
     for title in soup.find_all('title'):
-        print('title: ' + title.get_text())
+        logging.info('title: ' + title.get_text())
