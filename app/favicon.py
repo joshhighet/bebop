@@ -59,5 +59,5 @@ def main(domain, requestobject, doshodan=True):
         logging.debug(direct_url)
         return faviconmmh3
     if doshodan is True:
-        shodansearch.query('http.favicon.hash:' + faviconmmh3)
+        shodansearch.query('http.favicon.hash:' + str(faviconmmh3))
     return faviconmmh3
