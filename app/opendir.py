@@ -4,7 +4,7 @@
 check if a given page is returning an open directory
 '''
 import logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s %(message)s')
+log = logging.getLogger(__name__)
 
 directory_strings = [
     'Index of'
@@ -13,6 +13,6 @@ directory_strings = [
 def main(requestobject):
     for item in directory_strings:
         if item in requestobject.text:
-            logging.info('potential open directory - %s', requestobject.url)
+            log.info('potential open directory - %s', requestobject.url)
         else:
-            logging.debug('%s does not appear to be an open directory', requestobject.url)
+            log.debug('%s does not appear to be an open directory', requestobject.url)

@@ -9,7 +9,7 @@ import logging
 import tldextract
 from urllib.parse import urlparse
 
-logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s %(message)s')
+log = logging.getLogger(__name__)
 
 def nsresolve(fqdn):
     try:
@@ -50,7 +50,7 @@ def checktcp(host, port):
 def gen_chainconfig():
     proxy = getproxyvalue()
     if not checktcp(proxy[0], proxy[1]):
-        logging.critical('failed socks5 preflight socket check (%s:%s)', proxy[0], proxy[1])
+        log.critical('failed socks5 preflight socket check (%s:%s)', proxy[0], proxy[1])
         sys.exit(1)
     fqdnrex = re.compile(r'^[a-zA-Z0-9\-\.]+\.[a-zA-Z]{2,5}$')
     if fqdnrex.match(proxy[0]):
@@ -64,7 +64,7 @@ def gen_chainconfig():
             with open('proxychains.conf', 'a', encoding='utf-8') as chainconf:
                 chainconf.write(confstr)
         else:
-            logging.debug('socks4 already configured in proxychains.conf')
+            log.debug('socks4 already configured in proxychains.conf')
 
 def getfqdn(url):
     url_object = tldextract.extract(url)
@@ -81,7 +81,7 @@ def getbaseurl(url):
 def getsocks():
     proxy = getproxyvalue()
     if not checktcp(proxy[0], proxy[1]):
-        logging.critical('failed socks5 preflight socket check (%s:%s)', proxy[0], proxy[1])
+        log.critical('failed socks5 preflight socket check (%s:%s)', proxy[0], proxy[1])
         sys.exit(1)
     oproxies = {
         'http':  'socks5h://' + proxy[0] + ':' + str(proxy[1]),
@@ -93,9 +93,9 @@ def preflight():
     for path_item in path_checks:
         check = shutil.which(path_item)
         if check is None:
-            logging.critical('%f not found in path', path_item)
+            log.critical('%f not found in path', path_item)
             sys.exit(1)
     for file in file_checks:
         if not os.path.isfile(file):
-            logging.critical('%f not found', file)
+            log.critical('%f not found', file)
             sys.exit(1)

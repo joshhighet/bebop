@@ -50,12 +50,13 @@ if requestobject.status_code != 200:
     logging.warning('unexpected response code: %s', requestobject.status_code)
 title.main(requestobject)
 header_data = headers.main(requestobject)
+configcheck.main(args.target)
 if args.target.startswith('https'):
     getcert_data = getcert.main(args.target)
 pagespider_data = pagespider.main(args.target, requestobject)
-configcheck.main(args.target)
 favicon_data = favicon.main(url_base, requestobject)
 for item in pagespider_data['internal']:
+    logging.info('scanning %s', item)
     itemsource = getpage.main(item)
     if itemsource is not None:
         opendir.main(itemsource)

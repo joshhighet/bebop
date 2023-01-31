@@ -16,10 +16,7 @@ ARG SOCKS_HOST=10.4.4.4
 ENV SOCKS_PORT=$SOCKS_PORT
 ENV SOCKS_HOST=$SOCKS_HOST
 ENV PYTHONUNBUFFERED True
-ENV APP_HOME /app
-
-WORKDIR $APP_HOME
 COPY . ./
 RUN pip3 install --no-cache-dir -r requirements.txt
 
-ENTRYPOINT ["python3", "main.py"]
+ENTRYPOINT ["python3", "app"]

@@ -10,7 +10,7 @@ import subprocess
 
 from utilities import gen_chainconfig
 
-logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s %(message)s')
+log = logging.getLogger(__name__)
 
 gen_chainconfig()
 
@@ -24,7 +24,7 @@ nmap -sT -PN -n -sV --open -oX - --top-ports %s \
     return basecmd
 
 def portdata(port):
-    logging.debug('found port: %s', str(port['@portid']))
+    log.debug('found port: %s', str(port['@portid']))
     portinf = {
         'port': port['@portid'],
         'name': None,
@@ -65,32 +65,33 @@ def portdata(port):
                     if 'keyboard-interactive' in script['@output']:
                         portinf['shellauthmethods'].append('keyboard-interactive')
             except TypeError:
-                logging.debug('failed to parse banner script: %f', TypeError)
-                logging.debug(script)
+                log.debug('failed to parse banner script: %f', TypeError)
+                log.debug(script)
     return portinf
 
 def main(fqdn):
     command = commandgen(fqdn)
-    logging.info('commencing portscan')
-    logging.debug('command: %s', command)
+    log.info('commencing portscan')
+    log.debug('command: %s', command)
     output = subprocess.run(command, shell=True, capture_output=True, text=True, check=True)
     scanout = json.loads(output.stdout)
     scanout['args'] = scanout['nmaprun']['@args']
     if 'host' not in scanout['nmaprun']:
-        logging.debug('no open ports')
+        log.debug('no open ports')
         return scanout
     portarr = scanout['nmaprun']['host']['ports']['port']
-    logging.debug(scanout['nmaprun']['@args'])
+    log.debug(scanout['nmaprun']['@args'])
     if scanout['nmaprun']['host']['status']['@state'] == 'up':
         scanout['ports'] = []
         if isinstance(portarr, list):
             for port in portarr:
                 scanout['ports'].append(portdata(port))
-                logging.info('found port: %s', str(port['@portid']))
+                log.info('found port: %s', str(port['@portid']))
         else:
             scanout['ports'].append(portdata(portarr))
     else:
-        logging.debug('no open ports discovered')
+        log.info('err, no open ports found?')
+        log.error(scanout)
     scanout['time'] = int(float(scanout['nmaprun']['runstats']['finished']['@elapsed']))
-    logging.debug(scanout)
+    log.debug(scanout)
     return scanout

@@ -8,12 +8,12 @@ from urllib.parse import urljoin
 
 import cryptocurrency
 
-logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s %(message)s')
+log = logging.getLogger(__name__)
 
 def main(url, siterequest, skip_queryurl=True):
     cryptocurrency.main(siterequest.text)
     if skip_queryurl and '?' in url:
-        logging.error('this looks like a query url - skipping spider: %s', url)
+        log.error('this looks like a query url - skipping spider: %s', url)
         return None
     soup = BeautifulSoup(siterequest.content, 'html.parser')
     parsed_base_uri = urllib.parse.urlparse(url)
@@ -30,7 +30,7 @@ def main(url, siterequest, skip_queryurl=True):
         parsed_link = urllib.parse.urlparse(link)
         if link.startswith('mailto:'):
             email = link.replace('mailto:', '')
-            logging.info('found email: %s', email)
+            log.info('found email: %s', email)
             emails.append(email)
         elif parsed_link.netloc == parsed_base_uri.netloc:
             internal_links.append(link)
@@ -47,13 +47,13 @@ def main(url, siterequest, skip_queryurl=True):
         parsed_link = urllib.parse.urlparse(link)
         onion_domains.append(parsed_link.netloc)
     onion_domains = list(set(onion_domains))
-    logging.info('found %s emails', len(emails))
-    logging.info('found %s internal links', len(internal_links))
-    logging.info('found %s external links', len(external_links))
-    logging.info('found %s subdomain links', len(subdomain_links))
-    logging.info('found %s external onion links across %s domains', len(external_onionlinks), len(onion_domains))
+    log.info('found %s emails', len(emails))
+    log.info('found %s internal links', len(internal_links))
+    log.info('found %s external links', len(external_links))
+    log.info('found %s subdomain links', len(subdomain_links))
+    log.info('found %s external onion links across %s domains', len(external_onionlinks), len(onion_domains))
     for domain in onion_domains:
-        logging.info('domain: %s', domain)
+        log.info('domain: %s', domain)
     return {
         'emails': emails,
         'internal': internal_links,

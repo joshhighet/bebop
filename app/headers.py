@@ -4,7 +4,7 @@ import logging
 
 import shodansearch
 
-logging.basicConfig(level=logging.INFO, format='%(message)s')
+log = logging.getLogger(__name__)
 
 common_headers = []
 with open('common/headers.txt', 'r', encoding='utf-8') as common_headers_file:
@@ -21,13 +21,13 @@ def main(siterequest, doshodan=True):
     }
     for hedr in siterequest.headers:
         if hedr.lower() not in common_headers:
-            logging.info('header: ' + hedr + ' ' + siterequest.headers[hedr])
+            log.info('header: ' + hedr + ' ' + siterequest.headers[hedr])
             if hedr.lower() == 'set-cookie':
                 data['cookies'].append(siterequest.headers[hedr])
                 continue
             if hedr.lower() == 'etag' or hedr.lower() == 'e-tag':
                 if siterequest.headers[hedr].startswith('W/'):
-                    logging.warning('the etag found is tagged as a weak validator')
+                    log.warning('the etag found is tagged as a weak validator')
                     data['etag'] = siterequest.headers[hedr].replace('W/', '').strip('"')
                 else:
                     data['etag'] = siterequest.headers[hedr].strip('"')
@@ -37,7 +37,7 @@ def main(siterequest, doshodan=True):
                 continue
             data['interesting_headers'].append(hedr + ':' + siterequest.headers[hedr])
         else:
-            logging.debug('header: ' + hedr + ' ' + siterequest.headers[hedr])
+            log.debug('header: ' + hedr + ' ' + siterequest.headers[hedr])
     if doshodan and data['etag'] is not None:
         shodansearch.query(data['etag'])
     return data

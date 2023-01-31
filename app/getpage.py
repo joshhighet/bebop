@@ -5,7 +5,7 @@ import requests
 
 from utilities import getsocks
 
-logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s %(message)s')
+log = logging.getLogger(__name__)
 requests.packages.urllib3.disable_warnings()
 
 def main(weblocation, usetor=True):
@@ -13,7 +13,7 @@ def main(weblocation, usetor=True):
         reqproxies = getsocks()
     else:
         reqproxies = None
-    logging.debug('making request to: %s - tor:%s', weblocation, usetor)
+    log.debug('making request to: %s - tor:%s', weblocation, usetor)
     try:
         siterequest = requests.get(
             weblocation,
@@ -23,12 +23,12 @@ def main(weblocation, usetor=True):
             allow_redirects=True
         )
         if siterequest.history:
-            logging.warning('request was redirected to: %s', siterequest.url)
-        logging.debug('request took: %s seconds', siterequest.elapsed.total_seconds())
+            log.warning('request was redirected to: %s', siterequest.url)
+        log.debug('request took: %s seconds', siterequest.elapsed.total_seconds())
     except requests.exceptions.ConnectionError as rece:
-        logging.error(rece)
+        log.error(rece)
         return None
     except requests.exceptions.Timeout as ret:
-        logging.error(ret)
+        log.error(ret)
         return None
     return siterequest
