@@ -99,8 +99,9 @@ _to avoid noise, a list of the top 200 favicons have been added to this reposito
 this may need updating every now and then. to do so, run the following
 
 ```shell
-shodan stats --facets http.favicon.hash:200 port:80 \
+shodan stats --facets http.favicon.hash:1000 port:80,443 \
 | grep -oE '^[-]?[0-9]+' > common/favicon-hashes.txt
+echo 0 >> common/favicon-hashes.txt
 ```
 
 ### headers
