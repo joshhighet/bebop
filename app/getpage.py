@@ -19,7 +19,8 @@ def main(weblocation, usetor=True):
             weblocation,
             proxies=reqproxies,
             verify=False,
-            timeout=30
+            timeout=30,
+            allow_redirects=True
         )
         logging.debug('request took: %s seconds', siterequest.elapsed.total_seconds())
     except requests.exceptions.ConnectionError as rece:
