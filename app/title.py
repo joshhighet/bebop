@@ -7,5 +7,9 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s %(mess
 
 def main(requestobject):
     soup = BeautifulSoup(requestobject.text, 'html.parser')
-    title = soup.find('title').text
-    logging.info('title: %s', title)
+    title = soup.find('title')
+    if title is not None:
+        logging.info('title: %s', title.text)
+        return title.text
+    logging.error('no title found on page')
+    return None
