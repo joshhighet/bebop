@@ -10,11 +10,20 @@ import shodansearch
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s %(message)s')
 
-def main(domain, requestobject):
+def getmmh3(encodedfavicon):
+    return mmh3.hash(encodedfavicon)
+
+def commonhash(faviconmmh3):
+    with open('common/favicon-hashes.txt', 'r', encoding='utf-8') as f:
+        hashes = {int(line.rstrip()) for line in f}
+    if faviconmmh3 in hashes:
+        logging.info('favicon mmh3: %s (common hash)', faviconmmh3)
+        return True
+    logging.info('favicon mmh3: %s (not common hash)', faviconmmh3)
+    return False
+
+def getfavicon64(domain, requestobject):
     domain = domain.rstrip('/')
-    faviconmmh3 = None
-    if 'http' not in domain:
-        domain = 'http://' + domain
     soup = BeautifulSoup(requestobject.text, features="lxml")
     icon_link = soup.find("link", rel="shortcut icon")
     if icon_link is None:
@@ -23,23 +32,33 @@ def main(domain, requestobject):
         location = domain + '/favicon.ico'
     else:
         location = icon_link["href"]
-    if 'http' not in location:
+        if icon_link["href"].startswith('data:image/'):
+            favicon64 = icon_link["href"].split(',')[1]
+            return favicon64
+    if not location.startswith('http'):
         location = domain + location
-    if 'image/x-icon' not in location:
-        favicondata = getpage.main(location)
-        if favicondata is None:
-            logging.info('favicon site (%s) returned no response', location)
-            return faviconmmh3
-        if favicondata.status_code != 200:
-            logging.info('favicon site (%s) returned status code %s', \
-                location, favicondata.status_code)
-            return faviconmmh3
-        logging.info('favicon location: %s', location)
-        favicon64 = codecs.encode(favicondata.content,"base64")
-    else:
-        logging.info('favicon is encoded in html')
-        favicon64 = location[22:]
-        logging.debug('favicon64: %s', favicon64)
-    faviconmmh3 = mmh3.hash(favicon64)
+    logging.info('favicon location: %s', location)
+    favicondata = getpage.main(location)
+    if favicondata is None:
+        logging.info('favicon site (%s) returned no response', location)
+        return None
+    if favicondata.status_code != 200:
+        logging.info('favicon site (%s) returned status code %s', \
+            location, favicondata.status_code)
+        return None
+    favicon64 = codecs.encode(favicondata.content,"base64")
+    return favicon64
+
+def main(domain, requestobject, doshodan=True):
+    favicon64 = getfavicon64(domain, requestobject)
+    faviconmmh3 = getmmh3(favicon64)
     logging.info('favicon mmh3: %s', faviconmmh3)
+    if commonhash(faviconmmh3) is True:
+        logging.warn('favicon found in common hashlist, unlikely a unique asset - skipping shodan')
+        direct_url = 'https://www.shodan.io/search?query=http.favicon.hash%3A' + str(faviconmmh3)
+        logging.warn(direct_url)
+        return faviconmmh3
+    logging.info('favicon mmh3: %s', faviconmmh3)
+    if doshodan is True:
+        shodansearch.query(faviconmmh3, is_favicon=True)
     return faviconmmh3
