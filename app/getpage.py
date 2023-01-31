@@ -13,7 +13,6 @@ def main(weblocation, usetor=True):
         reqproxies = getsocks()
     else:
         reqproxies = None
-    log.debug('making request to: %s - tor:%s', weblocation, usetor)
     try:
         siterequest = requests.get(
             weblocation,
@@ -23,7 +22,9 @@ def main(weblocation, usetor=True):
             allow_redirects=True
         )
         if siterequest.history:
-            log.warning('request was redirected to: %s', siterequest.url)
+            for resp in siterequest.history:
+                log.info('redirect: %s (%s)', resp.url, resp.status_code)
+            log.info("followed to: %s", siterequest.url)
         log.debug('request took: %s seconds', siterequest.elapsed.total_seconds())
     except requests.exceptions.ConnectionError as rece:
         log.error(rece)

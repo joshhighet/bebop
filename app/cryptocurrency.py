@@ -2,7 +2,8 @@
 # https://raw.githubusercontent.com/joshhighet/bebop/main/assets/pagespider-test.html
 import re
 import logging
-import requests
+
+import getpage
 
 log = logging.getLogger(__name__)
 
@@ -14,7 +15,7 @@ rex = {
 
 def getwallet_data(wallet, chain='btc'):
     url = 'https://api.blockcypher.com/v1/%s/main/addrs/%s/balance' % (chain, wallet)
-    data = requests.get(url)
+    data = getpage.main(url)
     if data.status_code == 200:
         log.info('found %s wallet with balance %s (%s)', chain, data.json()['final_balance'], wallet)
         return data.json()

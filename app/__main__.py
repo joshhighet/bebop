@@ -10,18 +10,34 @@ import headers
 import favicon
 import pagespider
 import title
-import torscan
+import portscan
 import configcheck
 import opendir
 import shodansearch
 import getcert
+import cliart
 from utilities import preflight, getfqdn, getbaseurl, gen_chainconfig, validurl
-
-logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s %(message)s')
 
 parser = argparse.ArgumentParser()
 parser.add_argument('target', help='target address')
+parser.add_argument('--loglevel', 
+                    help='set logging level', 
+                    default='CRITICAL', 
+                    choices=['DEBUG', 'INFO', 'WARN', 'ERROR', 'CRITICAL'])
+parser.add_argument('--nosocks', 
+                    help='route traffic over clearnet (no tor)', 
+                    action='store_true', 
+                    default=False)
+parser.add_argument('--useragent', 
+                    help='set user-agent', 
+                    default='Mozilla/5.0 (Windows NT 10.0; rv:68.0) Gecko/20100101 Firefox/68.0')
 args = parser.parse_args()
+
+logging.basicConfig(
+    level=logging.getLevelName(args.loglevel),
+    format='%(asctime)-11s %(levelname)-8s %(filename)-15s %(funcName)-20s %(message)s',
+    datefmt="%I:%M:%S%p",
+)
 
 print(
 '''
@@ -37,12 +53,27 @@ print(
 ''')
 
 preflight()
+cliart.prints()
+if args.nosocks is True:
+    usrip = getpage.main('https://ipinfo.io/ip')
+    if usrip.status_code == 200:
+        logging.critical('clearnet traffic enabled.. (hello %s)', usrip.text)
 if not validurl(args.target):
-    logging.critical('failed to parse url - ensure a protocol is specified')
-    sys.exit(1)
+    if validurl('http://' + args.target):
+        logging.warning('no protocol found, appending http:// to target')
+        args.target = 'http://' + args.target
+    else:
+        logging.critical('failed to parse url - ensure a protocol is specified')
+        sys.exit(1)
 fqdn = getfqdn(args.target)
 url_base = getbaseurl(args.target)
-requestobject = getpage.main(args.target)
+print('fqdn: %s' % fqdn)
+if url_base == args.target:
+    print('target/base url: %s' % args.target)
+else:
+    print('base url: %s' % url_base)
+    print('target: %s' % args.target)
+requestobject = getpage.main(args.target, usetor=args.nosocks)
 if requestobject is None:
     logging.error('failed to retrieve page')
     sys.exit(1)
@@ -60,4 +91,4 @@ for item in pagespider_data['internal']:
     itemsource = getpage.main(item)
     if itemsource is not None:
         opendir.main(itemsource)
-torscan.main(fqdn)
+portscan.main(fqdn, useragent=args.useragent, usetor=args.nosocks)

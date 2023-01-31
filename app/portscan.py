@@ -14,15 +14,6 @@ log = logging.getLogger(__name__)
 
 gen_chainconfig()
 
-def commandgen(fqdn, usetor=True, max_scanport=10, useragent='Mozilla'):
-    basecmd='\
-nmap -sT -PN -n -sV --open -oX - --top-ports %s \
---version-intensity 4 --script ssh-hostkey,ssh-auth-methods,banner \
---script-args http.useragent="%s",ssh_hostkey=sha256,md5 %s | xq' % (max_scanport, useragent, fqdn)
-    if usetor:
-        basecmd = 'proxychains4 -f proxychains.conf ' + basecmd
-    return basecmd
-
 def portdata(port):
     log.debug('found port: %s', str(port['@portid']))
     portinf = {
@@ -69,9 +60,14 @@ def portdata(port):
                 log.debug(script)
     return portinf
 
-def main(fqdn):
-    command = commandgen(fqdn)
-    log.info('commencing portscan')
+def main(fqdn, useragent, usetor=True, max_scanport=10):
+    command='\
+nmap -sT -PN -n -sV --open -oX - --top-ports %s \
+--version-intensity 4 --script ssh-hostkey,ssh-auth-methods,banner \
+--script-args http.useragent="%s",ssh_hostkey=sha256,md5 %s | xq' % (max_scanport, useragent, fqdn)
+    if usetor:
+        command = 'proxychains4 -f ../proxychains.conf ' + command
+    log.info('commencing portscan on %s - cmd: %s', fqdn, command)
     log.debug('command: %s', command)
     output = subprocess.run(command, shell=True, capture_output=True, text=True, check=True)
     scanout = json.loads(output.stdout)

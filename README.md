@@ -122,7 +122,7 @@ _to avoid noise, a list of the top 200 favicons have been added to this reposito
 
 ### port scanning
 
-[torscan.py](app/torscan.py) leverages nmap, [proxychains-ng](https://github.com/rofl0r/proxychains-ng) and [yq](https://github.com/kislyuk/yq)
+[portscan.py](app/portscan.py) leverages nmap, [proxychains-ng](https://github.com/rofl0r/proxychains-ng) and [yq](https://github.com/kislyuk/yq)
 
 - yq is used to turn the XML outputted by nmap into JSON
 - unless specified only the top ten ports are scanned
