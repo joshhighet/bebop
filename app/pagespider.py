@@ -1,47 +1,64 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-'''
-return a list of all pages on a given site
-'''
 import re
 import logging
 import urllib.parse
 from bs4 import BeautifulSoup
 from urllib.parse import urljoin
 
+import cryptocurrency
+
 logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s %(message)s')
 
 def main(url, siterequest, skip_queryurl=True):
-    if skip_queryurl:
-        if '?' in url:
-            logging.error('looks like a query url - skipping spider: %s', url)
-            return {'internal': [], 'external': []}
+    cryptocurrency.main(siterequest.text)
+    if skip_queryurl and '?' in url:
+        logging.error('this looks like a query url - skipping spider: %s', url)
+        return None
     soup = BeautifulSoup(siterequest.content, 'html.parser')
+    parsed_base_uri = urllib.parse.urlparse(url)
     links = []
-    external_links = []
-    parsed_uri = urllib.parse.urlparse(url)
-    domain = '{uri.scheme}://{uri.netloc}/'.format(uri=parsed_uri)
     for link in soup.find_all('a', href=True):
-        if re.match("^http", link['href']):
-            if not re.search(r'\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}', link['href']):
-                link_parsed = urllib.parse.urlparse(link['href'])
-                link_domain = link_parsed.netloc
-                if domain in link['href'] or \
-                    (link_domain.startswith("www.") \
-                        and link_domain[4:] == domain[4:]):
-                    logging.debug('link: %s', link['href'])
-                    links.append(link['href'])
-                else:
-                    logging.debug('external link: %s', link['href'])
-                    external_links.append(link['href'])
-        else:
-            links.append(urljoin(url,link['href']))
-    if not links:
-        logging.debug('did not find any internal links')
-    if not external_links:
-        logging.debug('did not find any external links')
+        links.append(link['href'])
     dedup_links = list(set(links))
-    dedup_external_links = list(set(external_links))
-    logging.info('found %s internal links', len(dedup_links))
-    logging.info('found %s external links', len(dedup_external_links))
-    return {'internal': dedup_links, 'external': dedup_external_links}
+    emails = []
+    internal_links = []
+    external_links = []
+    external_onionlinks = []
+    subdomain_links = []
+    for link in dedup_links:
+        parsed_link = urllib.parse.urlparse(link)
+        if link.startswith('mailto:'):
+            email = link.replace('mailto:', '')
+            logging.info('found email: %s', email)
+            emails.append(email)
+        elif parsed_link.netloc == parsed_base_uri.netloc:
+            internal_links.append(link)
+        elif parsed_link.netloc == '':
+            internal_links.append(urljoin(url, link))
+        elif parsed_link.netloc.endswith(parsed_base_uri.netloc):
+            subdomain_links.append(link)
+        elif parsed_link.netloc.endswith('.onion'):
+            external_onionlinks.append(link)
+        else:
+            external_links.append(link)
+    onion_domains = []
+    for link in external_onionlinks:
+        parsed_link = urllib.parse.urlparse(link)
+        onion_domains.append(parsed_link.netloc)
+    onion_domains = list(set(onion_domains))
+    logging.info('found %s emails', len(emails))
+    logging.info('found %s internal links', len(internal_links))
+    logging.info('found %s external links', len(external_links))
+    logging.info('found %s subdomain links', len(subdomain_links))
+    logging.info('found %s external onion links across %s domains', len(external_onionlinks), len(onion_domains))
+    for domain in onion_domains:
+        logging.info('domain: %s', domain)
+    return {
+        'emails': emails,
+        'internal': internal_links,
+        'external': external_links,
+        'external_onion': external_onionlinks,
+        'subdomains': subdomain_links,
+        'onion_domains': onion_domains
+    }
