@@ -22,6 +22,8 @@ def main(weblocation, usetor=True):
             timeout=30,
             allow_redirects=True
         )
+        if siterequest.history:
+            logging.warning('request was redirected to: %s', siterequest.url)
         logging.debug('request took: %s seconds', siterequest.elapsed.total_seconds())
     except requests.exceptions.ConnectionError as rece:
         logging.error(rece)
