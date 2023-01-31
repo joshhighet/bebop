@@ -11,7 +11,11 @@ from urllib.parse import urljoin
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s %(message)s')
 
-def main(url, siterequest):
+def main(url, siterequest, skip_queryurl=True):
+    if skip_queryurl:
+        if '?' in url:
+            logging.error('looks like a query url - skipping spider: %s', url)
+            return {'internal': [], 'external': []}
     soup = BeautifulSoup(siterequest.content, 'html.parser')
     links = []
     external_links = []
