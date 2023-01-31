@@ -10,17 +10,29 @@ this is aimed to help expedite mundane checks when investigating onion services 
 
 ```mermaid
 graph LR
+    lookupsaver[(if rare value)]
+    opndir[check for open directories]
+    cryptoc[check for wallets]
+    getbal[get balance]
+    checks([/server-status\n/robots.txt\netc])
     anchor([input url]) -->mainget>get site content]
     anchor --> scan(port/service scan)
-    anchor --> |i.e /server-status|checker(configuration checks)
-    checker --> anchor
-    mainget --> favicon[check for favicon]
-    favicon --> |if MurmurHash found| lookup{{lookup on shodan}}
+    anchor --> checker(config checks)
+    checker -..-> checks
+    mainget --> favicon[get favicon fuzzyhash]
+    favicon --> lookupsaver
+    mainget --> title[fetch page title]
+    title --> lookupsaver
     mainget --> headers[inspect headers]
-    headers --> |if E-Tag found| lookup
-    mainget --> spider[spider each page]
-    spider --> opndir[check open directories]
-    opndir --> spider
+    headers --> |if etag|lookup
+    lookupsaver --> lookup{query subprocessors}
+    mainget --> spider[spider recursive pages]
+    mainget --> opndir
+    spider --> opndir
+    mainget --> cryptoc
+    spider --> cryptoc
+    cryptoc -..-> |ltc/btc/xmr| getbal
+    lookup --> shodan
 ```
 
 # methods
@@ -29,8 +41,11 @@ graph LR
 - etag detection (+shodan)
 - response header analysis (return rare/interesting headers)
 - technology identification (port scanning & service identification)
-- url spidering (open directory checks)
+- spidering (return samesite, subdomain and external URLs)
+- open directory checks
 - webpage title extraction
+- email extraction
+- wallet extraction & balance fetching (xmr,btc,eth)
 
 # technicals
 
@@ -94,15 +109,7 @@ if the response object is unknown or there is uncertainty with string-matches, u
 - if found, the favicon is downloaded and an [MurmurHash](https://commons.apache.org/proper/commons-codec/apidocs/org/apache/commons/codec/digest/MurmurHash3.html) is computed
 - the hash is searched against shodan with the `http.favicon.hash` - matches are returned
 
-_to avoid noise, a list of the top 200 favicons have been added to this repository - if a finding is matched, it will not be considered unique_
-
-this may need updating every now and then. to do so, run the following
-
-```shell
-shodan stats --facets http.favicon.hash:1000 port:80,443 \
-| grep -oE '^[-]?[0-9]+' > common/favicon-hashes.txt
-echo 0 >> common/favicon-hashes.txt
-```
+_to avoid noise, a list of the top 200 favicons have been added to this repository - if a finding is matched, it will not be considered unique - see the housekeeping section for details_
 
 ### headers
 
@@ -168,4 +175,24 @@ docker run \
 -e SOCKS_PORT=9050 \
 -e SHODAN_API_KEY=yourkey \
 ghcr.io/joshhighet/bebop:latest http://test-web.busmori.com
+```
+
+# housekeeping
+
+to avoid consuming unneccesary credits polling subprocessors a list of common results for a few tasks are stored as text files within this repo.
+
+this includes a list of the top 1000 favicon fuzzyhashes and the top 1000 server titles - if a match is found against these, it's unlikely to be a useful enough data-point to bother polling the likes of Shodan for
+
+these files should be updated every now and then. to do so, run the following
+
+```shell
+# for favicons
+shodan stats --facets http.favicon.hash:1000 port:80,443 \
+| grep -oE '^[-]?[0-9]+' > common/favicon-hashes.txt
+echo 0 >> common/favicon-hashes.txt
+# for http titles
+shodan stats --facets http.title:1000 port:80,443 \
+| grep -oE '^[^0-9]+' \
+| sed -r 's/^[[:space:]]+//;s/[[:space:]]+$//' \
+| sed '/^[[:space:]]*$/d' > common/http-titles.txt
 ```
