@@ -31,18 +31,17 @@ requestobject = getpage.main(args.target)
 if requestobject is None:
     logging.error('failed to retrieve page')
     sys.exit(1)
+if requestobject.status_code >= 400:
+    logging.warning('unexpected response code: %s', requestobject.status_code)
 title.main(requestobject)
 header_data = headers.main(requestobject)
 if header_data['etag'] is not None:
     etag_correlations = shodansearch.query(header_data['etag'])
 favicon_data = favicon.main(url_base, requestobject)
-if favicon_data is not None:
-    favicon_correlations = shodansearch.query(favicon_data, is_favicon=True)
 configcheck.main(args.target)
 torscan.main(fqdn)
 pagespider_data = pagespider.main(args.target, requestobject)
 for item in pagespider_data['internal']:
-    if '?' not in item:    
-        itemsource = getpage.main(item)
-        if itemsource is not None:
-            opendir.main(itemsource)
+    itemsource = getpage.main(item)
+    if itemsource is not None:
+        opendir.main(itemsource)
