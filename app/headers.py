@@ -25,7 +25,7 @@ def main(siterequest):
                 continue
             if hedr.lower() == 'etag' or hedr.lower() == 'e-tag':
                 if siterequest.headers[hedr].startswith('W/'):
-                    logging.warn('the etag found is tagged as a weak validator')
+                    logging.warning('the etag found is tagged as a weak validator')
                     data['etag'] = siterequest.headers[hedr].replace('W/', '').strip('"')
                 else:
                     data['etag'] = siterequest.headers[hedr].strip('"')
