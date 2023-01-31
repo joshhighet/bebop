@@ -174,7 +174,7 @@ docker run \
 -e SOCKS_HOST=yourproxy.fqdn \
 -e SOCKS_PORT=9050 \
 -e SHODAN_API_KEY=yourkey \
-ghcr.io/joshhighet/bebop:latest http://test-web.busmori.com
+ghcr.io/joshhighet/bebop:latest http://ciadotgov4sjwlzihbbgxnqg3xiyrg7so2r2o3lt5wz5ypk4sxyjstad.onion
 ```
 
 # housekeeping
