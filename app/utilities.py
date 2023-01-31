@@ -58,7 +58,8 @@ def gen_chainconfig():
     else:
         socksaddr = proxy[0]
     confstr = 'socks4 ' + socksaddr + ' ' + str(proxy[1])
-    with open('proxychains.conf', 'r', encoding='utf-8') as chainconf:
+    file_path = os.path.join(os.path.dirname(__file__), '../proxychains.conf')
+    with open(file_path, 'r', encoding='utf-8') as chainconf:
         contents = chainconf.read()
         if 'socks4' not in contents:
             with open('proxychains.conf', 'a', encoding='utf-8') as chainconf:
