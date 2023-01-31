@@ -16,12 +16,25 @@ def nsresolve(fqdn):
         return socket.gethostbyname(fqdn)
     except socket.gaierror:
         return None
+    
+def validurl(url):
+    urlregex = re.compile(
+        r'^(?:http)s?://'
+        r'(?:(?:[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?\.)+(?:[A-Z]{2,6}\.?|[A-Z0-9-]{2,}\.?)|'
+        r'\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})'
+        r'(?::\d+)?'
+        r'(?:/?|[/?]\S+)$', re.IGNORECASE)
+    if urlregex.match(url):
+        return True
+    return False
 
-socksport = os.environ.get('SOCKS_PORT', 9050)
-if nsresolve('host.docker.internal') is not None:
-    socksaddr = os.environ.get('SOCKS_HOST', 'host.docker.internal')
-else:
-    socksaddr = os.environ.get('SOCKS_HOST', 'localhost')
+def getproxyvalue():
+    socksport = os.environ.get('SOCKS_PORT', 9050)
+    if nsresolve('host.docker.internal') is not None:
+        socksaddr = os.environ.get('SOCKS_HOST', 'host.docker.internal')
+    else:
+        socksaddr = os.environ.get('SOCKS_HOST', 'localhost')
+    return socksaddr, socksport
 
 file_checks = ['proxychains.conf', 'common/headers.txt']
 path_checks = ['proxychains4','nmap']
@@ -34,14 +47,17 @@ def checktcp(host, port):
         return True
     return False
 
-def gen_chainconfig(socksaddr, socksport):
-    if not checktcp(socksaddr, socksport):
-        logging.critical('failed socks5 preflight socket check (%s:%s)', socksaddr, socksport)
+def gen_chainconfig():
+    proxy = getproxyvalue()
+    if not checktcp(proxy[0], proxy[1]):
+        logging.critical('failed socks5 preflight socket check (%s:%s)', proxy[0], proxy[1])
         sys.exit(1)
     fqdnrex = re.compile(r'^[a-zA-Z0-9\-\.]+\.[a-zA-Z]{2,5}$')
-    if fqdnrex.match(socksaddr):
-        socksaddr = nsresolve(socksaddr)
-    confstr = 'socks4 ' + socksaddr + ' ' + str(socksport)
+    if fqdnrex.match(proxy[0]):
+        socksaddr = nsresolve(proxy[0])
+    else:
+        socksaddr = proxy[0]
+    confstr = 'socks4 ' + socksaddr + ' ' + str(proxy[1])
     with open('proxychains.conf', 'r', encoding='utf-8') as chainconf:
         contents = chainconf.read()
         if 'socks4' not in contents:
@@ -63,12 +79,13 @@ def getbaseurl(url):
     return urlparse_object.scheme + '://' + urlparse_object.netloc
 
 def getsocks():
-    if not checktcp(socksaddr, socksport):
-        logging.critical('failed socks5 preflight socket check (%s:%s)', socksaddr, socksport)
+    proxy = getproxyvalue()
+    if not checktcp(proxy[0], proxy[1]):
+        logging.critical('failed socks5 preflight socket check (%s:%s)', proxy[0], proxy[1])
         sys.exit(1)
     oproxies = {
-        'http':  'socks5h://' + socksaddr + ':' + str(socksport),
-        'https': 'socks5h://' + socksaddr + ':' + str(socksport)
+        'http':  'socks5h://' + proxy[0] + ':' + str(proxy[1]),
+        'https': 'socks5h://' + proxy[0] + ':' + str(proxy[1])
     }
     return oproxies
 

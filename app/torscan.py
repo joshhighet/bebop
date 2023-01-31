@@ -12,9 +12,7 @@ from utilities import gen_chainconfig
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s %(levelname)s %(message)s')
 
-socksaddr = os.environ.get('SOCKS_HOST', 'host.docker.internal')
-socksport = os.environ.get('SOCKS_PORT', 9050)
-gen_chainconfig(socksaddr, socksport)
+gen_chainconfig()
 
 def commandgen(fqdn, usetor=True, max_scanport=10, useragent='Mozilla'):
     basecmd='\
@@ -77,22 +75,22 @@ def main(fqdn):
     logging.debug('command: %s', command)
     output = subprocess.run(command, shell=True, capture_output=True, text=True, check=True)
     scanout = json.loads(output.stdout)
-    scanobj['args'] = scanout['nmaprun']['@args']
+    scanout['args'] = scanout['nmaprun']['@args']
     if 'host' not in scanout['nmaprun']:
         logging.debug('no open ports')
-        return scanobj
+        return scanout
     portarr = scanout['nmaprun']['host']['ports']['port']
     logging.debug(scanout['nmaprun']['@args'])
     if scanout['nmaprun']['host']['status']['@state'] == 'up':
-        scanobj['ports'] = []
+        scanout['ports'] = []
         if isinstance(portarr, list):
             for port in portarr:
-                scanobj['ports'].append(portdata(port))
+                scanout['ports'].append(portdata(port))
                 logging.info('found port: %s', str(port['@portid']))
         else:
-            scanobj['ports'].append(portdata(portarr))
+            scanout['ports'].append(portdata(portarr))
     else:
         logging.debug('no open ports discovered')
-    scanobj['time'] = int(float(scanout['nmaprun']['runstats']['finished']['@elapsed']))
+    scanout['time'] = int(float(scanout['nmaprun']['runstats']['finished']['@elapsed']))
     logging.debug(scanout)
-    return scanobj
+    return scanout
