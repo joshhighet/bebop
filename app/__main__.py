@@ -16,7 +16,7 @@ import opendir
 import shodansearch
 import getcert
 import cliart
-from utilities import preflight, getfqdn, getbaseurl, gen_chainconfig, validurl
+from utilities import preflight, getfqdn, getbaseurl, validurl, getport
 
 parser = argparse.ArgumentParser()
 parser.add_argument('target', help='target address')
@@ -24,7 +24,7 @@ parser.add_argument('--loglevel',
                     help='set logging level', 
                     default='CRITICAL', 
                     choices=['DEBUG', 'INFO', 'WARN', 'ERROR', 'CRITICAL'])
-parser.add_argument('--nosocks', 
+parser.add_argument('--clearnet', 
                     help='route traffic over clearnet (no tor)', 
                     action='store_true', 
                     default=False)
@@ -35,7 +35,7 @@ args = parser.parse_args()
 
 logging.basicConfig(
     level=logging.getLevelName(args.loglevel),
-    format='%(asctime)-11s %(levelname)-8s %(filename)-15s %(funcName)-20s %(message)s',
+    format='%(asctime)-11s %(levelname)-8s %(lineno)d:%(filename)-15s %(funcName)-25s %(message)s',
     datefmt="%I:%M:%S%p",
 )
 
@@ -52,12 +52,14 @@ print(
           `---''---`                 hidden service safari 👀 🧅 💻 
 ''')
 
-preflight()
 cliart.prints()
-if args.nosocks is True:
-    usrip = getpage.main('https://ipinfo.io/ip')
-    if usrip.status_code == 200:
-        logging.critical('clearnet traffic enabled.. (hello %s)', usrip.text)
+if args.clearnet is True:
+    logging.critical('clearnet routing enabled..')
+    torstate = False
+else:
+    logging.debug('tor routing enabled..')
+    torstate = True
+    preflight()
 if not validurl(args.target):
     if validurl('http://' + args.target):
         logging.warning('no protocol found, appending http:// to target')
@@ -66,14 +68,16 @@ if not validurl(args.target):
         logging.critical('failed to parse url - ensure a protocol is specified')
         sys.exit(1)
 fqdn = getfqdn(args.target)
+if fqdn.endswith('.onion'):
+    if torstate is False:
+        logging.critical('you cannot disable tor routing if your target is a .onion service!')
+        sys.exit(1)
 url_base = getbaseurl(args.target)
-print('fqdn: %s' % fqdn)
-if url_base == args.target:
-    print('target/base url: %s' % args.target)
-else:
-    print('base url: %s' % url_base)
-    print('target: %s' % args.target)
-requestobject = getpage.main(args.target, usetor=args.nosocks)
+logging.debug('target: %s url_base: %s fqdn: %s', args.target, url_base, fqdn)
+if args.target.startswith('https'):
+    targetport = getport(args.target)
+    getcert_data = getcert.main(fqdn, port=targetport)
+requestobject = getpage.main(args.target, usetor=torstate)
 if requestobject is None:
     logging.error('failed to retrieve page')
     sys.exit(1)
@@ -81,14 +85,11 @@ if requestobject.status_code != 200:
     logging.warning('unexpected response code: %s', requestobject.status_code)
 title.main(requestobject)
 header_data = headers.main(requestobject)
-configcheck.main(args.target)
-if args.target.startswith('https'):
-    getcert_data = getcert.main(args.target)
+configcheck.main(args.target, usetor=torstate)
 pagespider_data = pagespider.main(args.target, requestobject)
-favicon_data = favicon.main(url_base, requestobject)
+favicon_data = favicon.main(url_base, requestobject, usetor=torstate)
 for item in pagespider_data['internal']:
-    logging.info('scanning %s', item)
     itemsource = getpage.main(item)
     if itemsource is not None:
         opendir.main(itemsource)
-portscan.main(fqdn, useragent=args.useragent, usetor=args.nosocks)
+portscan.main(fqdn, useragent=args.useragent, usetor=torstate)
