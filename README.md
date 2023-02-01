@@ -10,10 +10,15 @@ this is aimed to help expedite mundane checks when investigating onion services 
 ssl.cert.serial
 ```mermaid
 graph LR
+    subgraph subprocessors
+    blockcypher
+        subgraph netscans[scan data]
+        shodan
+        end
+    end
     lookupsaver[(if rare value)]
     opndir[check for open directories]
     cryptoc[check for wallets]
-    getbal[get balance]
     checks([/server-status\n/robots.txt\netc])
     anchor([input url]) -->mainget>get site content]
     anchor --> scan(port/service scan)
@@ -21,20 +26,20 @@ graph LR
     checker -..-> checks
     mainget --> favicon[get favicon fuzzyhash]
     mainget --> sslserial[get ssl serial]
-    sslserial --> lookupsaver
-    favicon --> lookupsaver
+    sslserial --> |ssl.cert.serial| lookupsaver
+    favicon --> |http.favicon.hash| lookupsaver
     mainget --> title[fetch page title]
-    title --> lookupsaver
+    title --> |http.title| lookupsaver
     mainget --> headers[inspect headers]
-    headers --> |if etag|lookup
-    lookupsaver --> lookup{query subprocessors}
+    headers --> |if etag|netscans
+    lookupsaver --> netscans
     mainget --> spider[spider recursive pages]
     mainget --> opndir
     spider --> opndir
     mainget --> cryptoc
     spider --> cryptoc
-    cryptoc -..-> |ltc/btc/xmr| getbal
-    lookup --> shodan
+    cryptoc -..-> ifsupportedcoin[/if LTC/XMR/BTC/]
+    ifsupportedcoin --> blockcypher
 ```
 
 # methods
