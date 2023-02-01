@@ -71,7 +71,13 @@ def getfqdn(url):
     url_object = tldextract.extract(url)
     if url_object.subdomain:
         return url_object.subdomain + '.' + url_object.domain + '.' + url_object.suffix
-    return url_object.domain + '.' + url_object.suffix
+    return url_object.domain + '.' + url_object.suffix\
+        
+def getport(url):
+    url_object = urlparse(url)
+    if url_object.port is None:
+        return None
+    return url_object.port
 
 def getbaseurl(url):
     urlparse_object = urlparse(url)
