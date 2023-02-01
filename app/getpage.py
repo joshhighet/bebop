@@ -13,6 +13,8 @@ def main(weblocation, usetor=True):
         reqproxies = getsocks()
     else:
         reqproxies = None
+    logging.debug('requesting: %s - usetor:%s', weblocation, usetor)
+    logging.debug('using proxies: %s', reqproxies)
     try:
         siterequest = requests.get(
             weblocation,
