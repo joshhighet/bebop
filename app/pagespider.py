@@ -47,13 +47,29 @@ def main(url, siterequest, skip_queryurl=True):
         parsed_link = urllib.parse.urlparse(link)
         onion_domains.append(parsed_link.netloc)
     onion_domains = list(set(onion_domains))
-    log.info('found %s emails', len(emails))
-    log.info('found %s internal links', len(internal_links))
-    log.info('found %s external links', len(external_links))
-    log.info('found %s subdomain links', len(subdomain_links))
-    log.info('found %s external onion links across %s domains', len(external_onionlinks), len(onion_domains))
-    for domain in onion_domains:
-        log.info('domain: %s', domain)
+    if len(onion_domains) > 0:
+        log.info('found %s external onion links across %s domains', len(external_onionlinks), len(onion_domains))
+        for domain in onion_domains:
+            log.info('domain: %s', domain)
+    else:
+        log.debug('no external onion links found')
+    if len(subdomain_links) > 0:
+        log.info('found %s subdomain links', len(subdomain_links))
+    else:
+        log.debug('no subdomain links found')
+    if len(external_links) > 0:
+        log.info('found %s external links', len(external_links))
+    else:
+        log.debug('no external links found')
+    if len(internal_links) > 0:
+        log.info('found %s internal links', len(internal_links))
+    else:
+        log.debug('no internal links found')
+    if len(emails) > 0:
+        log.info('found %s emails', len(emails))
+    else:
+        log.debug('no emails found')
+
     return {
         'emails': emails,
         'internal': internal_links,
