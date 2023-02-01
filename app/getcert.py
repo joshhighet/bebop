@@ -1,20 +1,93 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+# https://cryptography.io/en/latest/x509/reference/
+import idna
+import socks
 import logging
-import requests
+from OpenSSL import SSL
+import socket
+from cryptography import x509
+from cryptography.x509.oid import NameOID
+
+import shodansearch
+from utilities import getproxyvalue
+
+sockshost = getproxyvalue()[0]
+socksport = getproxyvalue()[1]
 
 log = logging.getLogger(__name__)
 
-def main(checkurl):
-    with requests.get(checkurl, stream=True) as response:
-        try:
-            certificate_info = response.raw.connection.sock.getpeercert()
-        except AttributeError:
-            log.error('failed to retrieve certificate information')
-            return None
-        subject = dict(x[0] for x in certificate_info['subject'])
-        issuer = dict(x[0] for x in certificate_info['issuer'])
-        subjectAltName = [x[1] for x in certificate_info['subjectAltName']]
-        certificate_info['subjectAltName'] = subjectAltName
-        certificate_info['subject'] = subject
-        certificate_info['issuer'] = issuer
-        log.info('certificate found (serial: %s), signed by %s for %s', certificate_info['serialNumber'], issuer['commonName'], subject['commonName'])
-        return certificate_info
+def commonserial(serial):
+    with open('common/ssl-serials.txt', 'r', encoding='utf-8') as f:
+        serials = {int(line.rstrip()) for line in f}
+    if serial in serials:
+        return True
+    return False
+
+def get_alt_names(cert):
+    try:
+        ext = cert.extensions.get_extension_for_class(x509.SubjectAlternativeName)
+        return ext.value.get_values_for_type(x509.DNSName)
+    except x509.ExtensionNotFound:
+        return None
+
+def get_common_name(cert):
+    try:
+        names = cert.subject.get_attributes_for_oid(NameOID.COMMON_NAME)
+        return names[0].value
+    except x509.ExtensionNotFound:
+        return None
+
+def get_issuer(cert):
+    try:
+        names = cert.issuer.get_attributes_for_oid(NameOID.COMMON_NAME)[0].value
+        return names
+    except x509.ExtensionNotFound:
+        return None
+
+def get_subject(cert):
+    try:
+        names = cert.subject.get_attributes_for_oid(NameOID.COMMON_NAME)
+        return names[0].value
+    except x509.ExtensionNotFound:
+        return None
+
+def main(fqdn, port, usetor=True, doshodan=True):
+    if port is None:
+        logging.debug('port not specified, defaulting to 443')
+        port = 443
+    hostname_idna = idna.encode(fqdn)
+    sock = socket.socket()
+    if usetor is True:
+        socks.setdefaultproxy(socks.PROXY_TYPE_SOCKS5, sockshost, socksport)
+    try:
+        sock.connect((fqdn, port))
+    except socket.gaierror:
+        logging.error('unable to resolve hostname: %s', fqdn)
+        return None
+    ctx = SSL.Context(SSL.SSLv23_METHOD)
+    ctx.check_hostname = False
+    ctx.verify_mode = SSL.VERIFY_NONE
+    sock_ssl = SSL.Connection(ctx, sock)
+    sock_ssl.set_connect_state()
+    sock_ssl.set_tlsext_host_name(hostname_idna)
+    sock_ssl.do_handshake()
+    cert = sock_ssl.get_peer_certificate()
+    crypto_cert = cert.to_cryptography()
+    sock_ssl.close()
+    sock.close()
+    if doshodan is True and commonserial(crypto_cert.serial_number) is False:
+        shodansearch.query('ssl.cert.serial:"' + str(crypto_cert.serial_number) + '"')
+    else:
+        logging.debug('serial number match in common list, not searching shodan')
+    data = {
+        'alt_names': get_alt_names(crypto_cert),
+        'common_name': get_common_name(crypto_cert),
+        'subject': get_subject(crypto_cert),
+        'issuer': get_issuer(crypto_cert),
+        'serial': crypto_cert.serial_number,
+        'not_before': crypto_cert.not_valid_before,
+        'not_after': crypto_cert.not_valid_after
+    }
+    logging.debug(data)
+    return data
