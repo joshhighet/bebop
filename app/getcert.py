@@ -59,12 +59,15 @@ def main(fqdn, port, usetor=True, doshodan=True):
     hostname_idna = idna.encode(fqdn)
     sock = socket.socket()
     if usetor is True:
+        log.debug('using tor proxy - %s:%s', sockshost, socksport)
         socks.setdefaultproxy(socks.PROXY_TYPE_SOCKS5, sockshost, socksport)
     try:
+        log.debug('connecting to %s:%s', fqdn, port)
         sock.connect((fqdn, port))
     except socket.gaierror:
-        logging.error('unable to resolve hostname: %s', fqdn)
-        return None
+        if fqdn.endswith('.onion') is False:
+            logging.error('unable to resolve hostname: %s', fqdn)
+            return None
     ctx = SSL.Context(SSL.SSLv23_METHOD)
     ctx.check_hostname = False
     ctx.verify_mode = SSL.VERIFY_NONE
