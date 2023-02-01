@@ -20,16 +20,16 @@ from utilities import preflight, getfqdn, getbaseurl, validurl, getport
 
 parser = argparse.ArgumentParser()
 parser.add_argument('target', help='target address')
-parser.add_argument('--loglevel', 
-                    help='set logging level', 
-                    default='CRITICAL', 
+parser.add_argument('--loglevel',
+                    help='set logging level',
+                    default='INFO',
                     choices=['DEBUG', 'INFO', 'WARN', 'ERROR', 'CRITICAL'])
-parser.add_argument('--clearnet', 
-                    help='route traffic over clearnet (no tor)', 
-                    action='store_true', 
+parser.add_argument('--clearnet',
+                    help='route traffic over clearnet (no tor)',
+                    action='store_true',
                     default=False)
-parser.add_argument('--useragent', 
-                    help='set user-agent', 
+parser.add_argument('--useragent',
+                    help='set user-agent',
                     default='Mozilla/5.0 (Windows NT 10.0; rv:68.0) Gecko/20100101 Firefox/68.0')
 args = parser.parse_args()
 
