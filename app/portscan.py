@@ -12,8 +12,6 @@ from utilities import gen_chainconfig
 
 log = logging.getLogger(__name__)
 
-gen_chainconfig()
-
 def portdata(port):
     log.debug('found port: %s', str(port['@portid']))
     portinf = {
@@ -66,6 +64,7 @@ nmap -sT -PN -n -sV --open -oX - --top-ports %s \
 --version-intensity 4 --script ssh-hostkey,ssh-auth-methods,banner \
 --script-args http.useragent="%s",ssh_hostkey=sha256,md5 %s | xq' % (max_scanport, useragent, fqdn)
     if usetor:
+        gen_chainconfig()
         command = 'proxychains4 -f ../proxychains.conf ' + command
     log.info('commencing portscan on %s - cmd: %s', fqdn, command)
     log.debug('command: %s', command)
