@@ -7,7 +7,7 @@
 inspired by the now defunct [onionscan](https://github.com/s-rah/onionscan), bebop is a collection of checks that attempt to reveal and uncloak hidden services
 
 this is aimed to help expedite mundane checks when investigating onion services and locations fronted by cdn's
-
+ssl.cert.serial
 ```mermaid
 graph LR
     lookupsaver[(if rare value)]
@@ -20,6 +20,8 @@ graph LR
     anchor --> checker(config checks)
     checker -..-> checks
     mainget --> favicon[get favicon fuzzyhash]
+    mainget --> sslserial[get ssl serial]
+    sslserial --> lookupsaver
     favicon --> lookupsaver
     mainget --> title[fetch page title]
     title --> lookupsaver
@@ -46,6 +48,7 @@ graph LR
 - webpage title extraction
 - email extraction
 - wallet extraction & balance fetching (xmr,btc,eth)
+- certificate trailing (serial lookup)
 
 # technicals
 
@@ -181,18 +184,25 @@ ghcr.io/joshhighet/bebop:latest http://ciadotgov4sjwlzihbbgxnqg3xiyrg7so2r2o3lt5
 
 to avoid consuming unneccesary credits polling subprocessors a list of common results for a few tasks are stored as text files within this repo.
 
-this includes a list of the top 1000 favicon fuzzyhashes and the top 1000 server titles - if a match is found against these, it's unlikely to be a useful enough data-point to bother polling the likes of Shodan for
+this includes a list of the top 1000 favicon fuzzyhashes, top 1500 ssl serials and the top 1000 server titles - if a match is found against these, it's unlikely to be a useful enough data-point to bother polling the likes of Shodan for
 
 these files should be updated every now and then. to do so, run the following
 
 ```shell
 # for favicons
 shodan stats --facets http.favicon.hash:1000 port:80,443 \
-| grep -oE '^[-]?[0-9]+' > common/favicon-hashes.txt
+| grep -oE '^[-]?[0-9]+' \
+> common/favicon-hashes.txt
 echo 0 >> common/favicon-hashes.txt
 # for http titles
 shodan stats --facets http.title:1000 port:80,443 \
 | grep -oE '^[^0-9]+' \
 | sed -r 's/^[[:space:]]+//;s/[[:space:]]+$//' \
-| sed '/^[[:space:]]*$/d' > common/http-titles.txt
+| sed '/^[[:space:]]*$/d' \
+> common/http-titles.txt
+# for x509 serials
+shodan stats --facets ssl.cert.serial:2000 port:443,8443 \
+| grep -o '^[^ ]*' \
+| sed '/Top/d' \
+> common/ssl-serials.txt
 ```
