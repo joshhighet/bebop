@@ -11,7 +11,13 @@ phrases = [
     "angering the bees...",
     "rounding up the usual suspects...",
     "checking the oil...",
-    "harvesting frozen peas..."
+    "harvesting frozen peas...",
+    "yes, father. i shall become a bat...",
+    "may the force be with you...",
+    "better out than in, i always say...",
+    "E.T. phone home...",
+    "just keep swimming...",
+    "to infinity and beyond!"
 ]
 
 bar = [

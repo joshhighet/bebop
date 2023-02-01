@@ -17,14 +17,14 @@ def query(query):
         log.error("shodan: without an api key queries are skipped")
         return findings
     try:
-        log.info('shodan: querying "%s"', query)
+        log.debug('shodan: querying %s', query)
         results = api.search(query)
-        log.info('shodan: found %s results', results['total'])
+        log.info('shodan: found %s results for %s', results['total'], query)
         if results['total'] > 20:
             log.warning('shodan: a large number of findings here is abnormal. review results carefully!')
         for result in results['matches']:
             findings.append(result)
-            log.info('shodan: found %s', result['ip_str'])
+            log.debug('shodan: found %s', result['ip_str'])
             log.debug('shodan: %s', result['data'])
     except shodan.APIError as sae:
         log.error('shodan: api error: %s', sae)

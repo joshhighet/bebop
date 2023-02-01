@@ -20,7 +20,7 @@ def commonhash(faviconmmh3):
         return True
     return False
 
-def getfavicon64(domain, requestobject):
+def getfavicon64(domain, requestobject, usetor=True):
     domain = domain.rstrip('/')
     soup = BeautifulSoup(requestobject.text, features="lxml")
     icon_link = soup.find("link", rel="shortcut icon")
@@ -35,8 +35,8 @@ def getfavicon64(domain, requestobject):
             return favicon64
     if not location.startswith('http'):
         location = domain + location
-    log.info('favicon location: %s', location)
-    favicondata = getpage.main(location)
+    log.debug('i think the favicon location is: %s', location)
+    favicondata = getpage.main(location, usetor=usetor)
     if favicondata is None:
         log.info('favicon location (%s) returned no response', location)
         return None
@@ -47,8 +47,8 @@ def getfavicon64(domain, requestobject):
     favicon64 = codecs.encode(favicondata.content,"base64")
     return favicon64
 
-def main(domain, requestobject, doshodan=True):
-    favicon64 = getfavicon64(domain, requestobject)
+def main(domain, requestobject, doshodan=True, usetor=True):
+    favicon64 = getfavicon64(domain, requestobject, usetor=usetor)
     if favicon64 is None:
         return None
     faviconmmh3 = getmmh3(favicon64)

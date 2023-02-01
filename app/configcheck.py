@@ -14,11 +14,12 @@ interesting_paths = [
     {'uri': '/sitemap.xml', 'code': 200, 'text': None},
 ]
 
-def main(location):
+def main(location, usetor=True):
     if location.endswith('/'):
         location = location[:-1]
     for path in interesting_paths:
-        page = getpage.main(location + path['uri'])
+        log.info('scanning %s - expecting %s', location + path['uri'], path['code'])
+        page = getpage.main(location + path['uri'], usetor=usetor)
         if page is None:
             log.error('no response from {}'.format(location + path['uri']))
             continue
