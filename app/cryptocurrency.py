@@ -2,8 +2,9 @@
 # https://raw.githubusercontent.com/joshhighet/bebop/main/assets/pagespider-test.html
 import re
 import logging
-
+from bs4 import BeautifulSoup
 import getpage
+import requests
 
 log = logging.getLogger(__name__)
 
@@ -38,3 +39,30 @@ def main(sitesource):
             else:
                 log.info('found suspected %s wallet: %s', currency, value)
     return findings
+
+def walletexplorer_inspect_and_pivot(address):
+    walletid = ""
+    addresses = []
+    try:
+        ##walletnote
+        addresswe = f"https://www.walletexplorer.com/address/{address}"
+        pageaddr = requests.get(addresswe)
+        soup = BeautifulSoup(pageaddr.text, 'html.parser')
+        linkwallet = soup.find("div", {"class": "walletnote"}).find('a').get('href')
+        walletid =  linkwallet.split("/")
+        if(len(walletid)>0):
+            urlwalletaddress = f"https://www.walletexplorer.com/wallet/{walletid[2]}/addresses"
+            walletaddr = requests.get(urlwalletaddress)
+            soup = BeautifulSoup(walletaddr.text, 'html.parser')
+            addresstable = soup.find("table")
+            trs = addresstable.find_all('tr')
+            first = True
+            for tr in trs:
+                if not first:
+                    pivotaddress = tr.find("a").get("href").replace("/address/","")
+                    if pivotaddress != address:
+                        addresses.append(pivotaddress)
+                first = False
+    except Exception as exx:
+        log.error('%s: failed to retrieve data about %s - likely a false match', exx, address)
+    return walletid, addresses

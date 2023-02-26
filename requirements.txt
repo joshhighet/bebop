@@ -3,6 +3,7 @@ mmh3
 lxml
 shodan
 pyOpenSSL
+censys
 tldextract
 BeautifulSoup4
 requests[socks]

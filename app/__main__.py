@@ -4,7 +4,7 @@ import os
 import sys
 import logging
 import argparse
-
+import cryptocurrency
 import getpage
 import headers
 import favicon
@@ -14,6 +14,7 @@ import portscan
 import configcheck
 import opendir
 import shodansearch
+import censyssearch
 import getcert
 import cliart
 from utilities import preflight, getfqdn, getbaseurl, validurl, getport

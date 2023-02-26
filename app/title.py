@@ -5,6 +5,7 @@ import warnings
 from bs4 import BeautifulSoup
 
 import shodansearch
+import censyssearch
 
 log = logging.getLogger(__name__)
 warnings.filterwarnings("ignore", category=UserWarning, module='bs4')
@@ -15,7 +16,7 @@ with open('common/http-titles.txt', 'r', encoding='utf-8') as common_titles_file
         common_titles.append(line.strip())
     common_titles_file.close()
 
-def main(requestobject, doshodan=True):
+def main(requestobject, doshodan=True, docensys=True):
     if len(requestobject.text.splitlines()) == 1:
         log.error('single line response, not parsing')
         return None
@@ -25,6 +26,9 @@ def main(requestobject, doshodan=True):
         log.info('title: %s', title.text)
         if doshodan and title.text not in common_titles:
             shodansearch.query('http.title:"' + title.text + '"')
+        if docensys and title.text not in common_titles:
+            censyssearch.query('http.title:"' + title.text + '"')
+
         return title.text
     log.error('no title found on page')
     log.debug('page source: %s', requestobject.text)
