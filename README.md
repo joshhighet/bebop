@@ -14,6 +14,7 @@ graph LR
     blockcypher
         subgraph netscans[scan data]
         shodan
+        censys
         end
     end
     lookupsaver[(if rare value)]
