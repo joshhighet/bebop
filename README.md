@@ -11,7 +11,10 @@ ssl.cert.serial
 ```mermaid
 graph LR
     subgraph subprocessors
-    blockcypher
+        subgraph cryptocurrency[coin data]
+        blockcypher
+        walletexplorer
+        end
         subgraph netscans[scan data]
         shodan
         censys
@@ -40,7 +43,7 @@ graph LR
     mainget --> cryptoc
     spider --> cryptoc
     cryptoc -..-> ifsupportedcoin[/if LTC/XMR/BTC/]
-    ifsupportedcoin --> blockcypher
+    ifsupportedcoin --> cryptocurrency
 ```
 
 # methods
