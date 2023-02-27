@@ -7,7 +7,7 @@
 inspired by the now defunct [onionscan](https://github.com/s-rah/onionscan), bebop is a collection of checks that attempt to reveal and uncloak hidden services
 
 this is aimed to help expedite mundane checks when investigating onion services and locations fronted by cdn's
-ssl.cert.serial
+
 ```mermaid
 graph LR
     subgraph subprocessors
