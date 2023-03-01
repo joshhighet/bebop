@@ -12,11 +12,14 @@ graph LR
         subgraph cryptocurrency[coin data]
         blockcypher
         walletexplorer
+        blockcypher -..-> |pivot|walletexplorer
+        walletexplorer -..-> blockcypher
         end
         subgraph netscans[scan data]
         shodan
         censys
         binaryedge
+        zoomeye
         end
     end
     lookupsaver[(if rare value)]
@@ -51,8 +54,8 @@ graph LR
 
 # methods
 
-- favicon detection (+shodan)
-- etag detection (+shodan)
+- favicon detection
+- etag detection
 - response header analysis (return rare/interesting headers)
 - technology identification (port scanning & service identification)
 - spidering (return samesite, subdomain and external URLs)
@@ -122,7 +125,7 @@ if the response object is unknown or there is uncertainty with string-matches, u
 
 - the favicon discovery will attempt to parse the icon from any HTML, falling back to hardcoded paths
 - if found, the favicon is downloaded and an [MurmurHash](https://commons.apache.org/proper/commons-codec/apidocs/org/apache/commons/codec/digest/MurmurHash3.html) is computed
-- the hash is searched against shodan with the `http.favicon.hash` - matches are returned
+- the hash is searched against <todo>
 
 _to avoid noise, a list of the top 200 favicons have been added to this repository - if a finding is matched, it will not be considered unique - see the housekeeping section for details_
 
@@ -130,7 +133,7 @@ _to avoid noise, a list of the top 200 favicons have been added to this reposito
 
 [headers.py](app/headers.py) does some light analysis on response headers. there are four key outputs
 
-- `etag` - is a server etag is found, it is searched against shodan
+- `etag` - is a server etag is found, it is searched against <todo>
 - `server` - the value for the `Server` HTTP header
 - `cookies` - any cookies dropped by the server during the request
 - `interesting_headers` - any rare/interesting headers. essentially the response headers with exclusions - see [headers.txt](app/common/headers.txt)
@@ -174,7 +177,7 @@ docker build --build-arg SOCKS_HOST=10.20.30.40 --build-arg SOCKS_PORT=8080 bebo
 
 ## external services
 
-if given credentials, both censys & shodan can be used to for enrichment, see the above diagram for specific use criteria
+if given credentials, binaryedge, censys, shodan & zoomeye can be used to for enrichment, see the above diagram for specific use criteria
 
 _using one, any or all external data repositories is optional and only done when authorisation parameters are explicitly provided_
 
@@ -186,6 +189,9 @@ _using one, any or all external data repositories is optional and only done when
 
 - to leverage Binaryedge, provide your `BINARYEDGE_API_KEY`
 > you can fetch this from [app.binaryedge.io/account/api](https://app.binaryedge.io/account/api)
+
+- to leverage ZoomEye, provide your `ZOOMEYE_API_KEY`
+> you can fetch this from [zoomeye.org/profile](https://www.zoomeye.org/profile)
 
 if you have already built the image locally, run
 
@@ -205,6 +211,7 @@ docker run \
 -e CENSYS_API_ID=yourid \
 -e CENSYS_API_SECRET=yourkey \
 -e BINARYEDGE_API_KEY=yourkey \
+-e ZOOMEYE_API_KEY=yourkey \
 ghcr.io/joshhighet/bebop:latest http://ciadotgov4sjwlzihbbgxnqg3xiyrg7so2r2o3lt5wz5ypk4sxyjstad.onion
 ```
 
@@ -212,7 +219,7 @@ ghcr.io/joshhighet/bebop:latest http://ciadotgov4sjwlzihbbgxnqg3xiyrg7so2r2o3lt5
 
 to avoid consuming unneccesary credits polling subprocessors a list of common results for a few tasks are stored as text files within this repo.
 
-this includes a list of the top 1000 favicon fuzzyhashes, top 1500 ssl serials and the top 1000 server titles - if a match is found against these, it's unlikely to be a useful enough data-point to bother polling the likes of Shodan for
+this includes a list of the top 1000 favicon fuzzyhashes, top 1500 ssl serials and the top 1000 server titles - if a match is found against these, it's unlikely to be a useful enough data-point to bother polling the likes of <todo> for
 
 these files should be updated every now and then. to do so, run the following
 

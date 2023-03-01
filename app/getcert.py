@@ -12,6 +12,7 @@ from cryptography.x509.oid import NameOID
 import shodansearch
 import censyssearch
 import bedgesearch
+import zoomeyesearch
 from utilities import getproxyvalue
 
 sockshost = getproxyvalue()[0]
@@ -54,7 +55,7 @@ def get_subject(cert):
     except x509.ExtensionNotFound:
         return None
 
-def main(fqdn, port, usetor=True, doshodan=True, docensys=True, dobedge=True):
+def main(fqdn, port, usetor=True, doshodan=True, docensys=True, dobedge=True, dozoome=True):
     if port is None:
         logging.debug('port not specified, defaulting to 443')
         port = 443
@@ -88,6 +89,8 @@ def main(fqdn, port, usetor=True, doshodan=True, docensys=True, dobedge=True):
             censyssearch.query('services.tls.certificates.leaf_data.subject.serial_number:"' + str(crypto_cert.serial_number) + '"')
         if dobedge is True:
             bedgesearch.query('ssl.cert.serial:"' + str(crypto_cert.serial_number) + '"')
+        if dozoome is True:
+            zoomeyesearch.query('ssl.cert.serial:"' + str(crypto_cert.serial_number) + '"')
     else:
         logging.debug('serial number match in common list, not searching shodan')
     data = {

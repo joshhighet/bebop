@@ -5,6 +5,7 @@ import logging
 import shodansearch
 import censyssearch
 import bedgesearch
+import zoomeyesearch
 
 log = logging.getLogger(__name__)
 
@@ -14,7 +15,7 @@ with open('common/headers.txt', 'r', encoding='utf-8') as common_headers_file:
         common_headers.append(line.strip())
     common_headers_file.close()
 
-def main(siterequest, doshodan=True, docensys=True, dobedge=True):
+def main(siterequest, doshodan=True, docensys=True, dobedge=True, dozoome=True):
     data = {
         'etag': None,
         'server': None,
@@ -47,4 +48,6 @@ def main(siterequest, doshodan=True, docensys=True, dobedge=True):
             censyssearch.query(data['etag'])
         if dobedge:
             bedgesearch.query(data['etag'])
+        if dozoome:
+            zoomeyesearch.query(data['etag'])
     return data

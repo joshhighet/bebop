@@ -10,6 +10,7 @@ import getpage
 import shodansearch
 import bedgesearch
 import censyssearch
+import zoomeyesearch
 
 log = logging.getLogger(__name__)
 
@@ -55,7 +56,7 @@ def getfavicon64(domain, requestobject, usetor=True):
     favicon64 = codecs.encode(favicondata.content,"base64")
     return favicon64
 
-def main(domain, requestobject, doshodan=True, usetor=True, docensys=True, dobedge=True):
+def main(domain, requestobject, doshodan=True, usetor=True, docensys=True, dobedge=True, dozoome=True):
     favicon64 = getfavicon64(domain, requestobject, usetor=usetor)
     if favicon64 is None:
         return None
@@ -73,4 +74,6 @@ def main(domain, requestobject, doshodan=True, usetor=True, docensys=True, dobed
         censyssearch.query('services.http.response.favicons.md5_hash:' + str(faviconmd5))
     if dobedge is True:
         bedgesearch.query('web.favicon.mmh3:' + str(faviconmmh3))
+    if dozoome is True:
+        zoomeyesearch.query('iconhash:' + str(faviconmmh3))
     return faviconmmh3
