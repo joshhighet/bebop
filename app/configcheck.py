@@ -15,6 +15,8 @@ interesting_paths = [
     {'uri': '/server-info', 'code': 200, 'text': 'Apache'},
     {'uri': '/robots.txt', 'code': 200, 'text': None},
     {'uri': '/sitemap.xml', 'code': 200, 'text': None},
+    {'uri': '/wp-login.php', 'code': 200, 'text': 'login'},
+    {'uri': '/xmlrpc.php', 'code': 405, 'text': 'XML-RPC server accepts POST requests only'}
 ]
 
 def main(location, usetor=True):
