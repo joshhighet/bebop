@@ -27,9 +27,9 @@ def main(requestobject, doshodan=True, docensys=True):
         if doshodan and title.text not in common_titles:
             shodansearch.query('http.title:"' + title.text + '"')
         if docensys and title.text not in common_titles:
-            censyssearch.query('http.title:"' + title.text + '"')
-
+            querystr = 'services.http.response.html_title:"' + title.text + '"'
+            censyssearch.query(querystr)
         return title.text
     log.error('no title found on page')
-    log.debug('page source: %s', requestobject.text)
+    #log.debug('page source: %s', requestobject.text)
     return None
