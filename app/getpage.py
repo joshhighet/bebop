@@ -3,7 +3,7 @@
 import logging
 import requests
 
-from utilities import getsocks
+from utilities import getsocks, useragentstr
 
 log = logging.getLogger(__name__)
 requests.packages.urllib3.disable_warnings()
@@ -21,6 +21,7 @@ def main(weblocation, usetor=True):
             proxies=reqproxies,
             verify=False,
             timeout=30,
+            headers={'User-Agent': useragentstr},
             allow_redirects=True
         )
         if siterequest.history:

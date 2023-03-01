@@ -6,6 +6,8 @@ from bs4 import BeautifulSoup
 import getpage
 import requests
 
+from utilities import useragentstr
+
 log = logging.getLogger(__name__)
 
 rex = {
@@ -46,13 +48,13 @@ def walletexplorer_inspect_and_pivot(address):
     try:
         ##walletnote
         addresswe = f"https://www.walletexplorer.com/address/{address}"
-        pageaddr = requests.get(addresswe)
+        pageaddr = requests.get(addresswe, headers={'User-Agent': useragentstr})
         soup = BeautifulSoup(pageaddr.text, 'html.parser')
         linkwallet = soup.find("div", {"class": "walletnote"}).find('a').get('href')
         walletid =  linkwallet.split("/")
         if(len(walletid)>0):
             urlwalletaddress = f"https://www.walletexplorer.com/wallet/{walletid[2]}/addresses"
-            walletaddr = requests.get(urlwalletaddress)
+            walletaddr = requests.get(urlwalletaddress, headers={'User-Agent': useragentstr})
             soup = BeautifulSoup(walletaddr.text, 'html.parser')
             addresstable = soup.find("table")
             trs = addresstable.find_all('tr')
