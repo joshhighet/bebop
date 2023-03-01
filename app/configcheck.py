@@ -44,7 +44,7 @@ def main(location, usetor=True):
             except requests.exceptions.Timeout as ret:
                 log.error(ret)
             if '404' and 'Page not found' in response.text:
-                log.debug('i believe this page is a 404 actually with incorrect status code')
+                log.debug('this page looks like a 404 w/ the wrong status code!')
                 continue
             if response.status_code == path['code']:
                 title.main(response)
