@@ -1,12 +1,10 @@
 # bebop
 
-:construction: _this project is a work in progress under active development_
-
 ---
 
-inspired by the now defunct [onionscan](https://github.com/s-rah/onionscan), bebop is a collection of checks that attempt to reveal and uncloak hidden services
+inspired by the now defunct [onionscan](https://github.com/s-rah/onionscan), bebop is my spin on a suite checks if you're attempting to reveal and uncloak hidden services
 
-this is aimed to help expedite mundane checks when investigating onion services and locations fronted by cdn's
+bebop it is aimed to help expedite some of the many mundane tasks involved in investigating onion services and locations fronted by cdn's
 
 ```mermaid
 graph LR
@@ -21,10 +19,14 @@ graph LR
         end
     end
     lookupsaver[(if rare value)]
+    fuzzlist[(fuzzlist)]
     opndir[check for open directories]
     cryptoc[check for wallets]
     checks([/server-status\n/robots.txt\netc])
     anchor([input url]) -->mainget>get site content]
+    mainget --> fuzz[directory/file enumeration]
+    fuzz -..-> fuzzlist
+    fuzzlist -..-> fuzz
     anchor --> scan(port/service scan)
     anchor --> checker(config checks)
     checker -..-> checks
@@ -169,6 +171,16 @@ docker build --build-arg SOCKS_HOST=10.20.30.40 --build-arg SOCKS_PORT=8080 bebo
 
 # running
 
+## external services
+
+if given credentials, both censys & shodan can be used to for enrichment, see the above diagram for specific use criteria
+
+- to leverage Censys, provide both your `CENSYS_API_ID` and the accompanying `CENSYS_API_SECRET`.
+> you can fetch this from [search.censys.io/account/api](https://search.censys.io/account/api)
+
+- to leverage Shodan, provide your `SHODAN_API_KEY`.
+> you can fetch this from [account.shodan.io](https://account.shodan.io)
+
 if you have already built the image locally, run
 
 ```shell
@@ -179,13 +191,13 @@ run from ghcr with the below
 
 unless specified (like below) the SOCKS5 proxy will default to `host.docker.internal:9050`
 
-if no `SHODAN_API_KEY` var is supplied searches will be skipped
-
 ```shell
 docker run \
 -e SOCKS_HOST=yourproxy.fqdn \
 -e SOCKS_PORT=9050 \
 -e SHODAN_API_KEY=yourkey \
+-e CENSYS_API_ID=yourid \
+-e CENSYS_API_SECRET=yourkey \
 ghcr.io/joshhighet/bebop:latest http://ciadotgov4sjwlzihbbgxnqg3xiyrg7so2r2o3lt5wz5ypk4sxyjstad.onion
 ```
 
@@ -209,6 +221,7 @@ shodan stats --facets http.title:1000 port:80,443 \
 | sed -r 's/^[[:space:]]+//;s/[[:space:]]+$//' \
 | sed '/^[[:space:]]*$/d' \
 > common/http-titles.txt
+echo '404 Error Page' >> common/http-titles.txt
 # for x509 serials
 shodan stats --facets ssl.cert.serial:2000 port:443,8443 \
 | grep -o '^[^ ]*' \
