@@ -8,7 +8,7 @@ log = logging.getLogger(__name__)
 requests.packages.urllib3.disable_warnings()
 
 import title
-from utilities import getsocks
+from utilities import getsocks, useragentstr
 
 interesting_paths = [
     {'uri': '/server-status', 'code': 200, 'text': 'Apache'},
@@ -31,11 +31,21 @@ def main(location, usetor=True):
             uri = location + path['uri']
             log.info('scanning %s - expecting %s', uri, path['code'])
             try:
-                response = session.get(uri, proxies=reqproxies, verify=False, timeout=30, allow_redirects=True)
+                response = session.get(
+                    uri,
+                    proxies=reqproxies,
+                    verify=False,
+                    timeout=30,
+                    allow_redirects=True,
+                    headers={'User-Agent': useragentstr}
+                    )
             except requests.exceptions.ConnectionError as rece:
                 log.error(rece)
             except requests.exceptions.Timeout as ret:
                 log.error(ret)
+            if '404' and 'Page not found' in response.text:
+                log.debug('i believe this page is a 404 actually with incorrect status code')
+                continue
             if response.status_code == path['code']:
                 title.main(response)
                 if path['text'] is None:
@@ -46,5 +56,3 @@ def main(location, usetor=True):
                     log.debug(f'found {path["code"]} at {uri} but no match for {path["text"]}')
             else:
                 log.debug(f'found {response.status_code} at {uri}')
-            if any(path['code'] == response.status_code and (path['text'] is None or path['text'] in response.text) for path in interesting_paths):
-                break
