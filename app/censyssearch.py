@@ -12,18 +12,16 @@ CENSYS_API_SECRET = os.getenv('CENSYS_API_SECRET', None)
 if CENSYS_API_SECRET and CENSYS_API_ID:
     api = CensysHosts(api_id=CENSYS_API_ID, api_secret=CENSYS_API_SECRET)
 
-def query(search):
+def query(squery):
     findings = []
     if not (CENSYS_API_ID or CENSYS_API_ID):
         log.error("censys: without an api key queries are skipped")
         return findings
     try:
-        log.debug('censys: querying %s', search)
-        results = api.search(
-            f'services.http.response.html_tags="<title>{search}</title>"'
-        )
+        log.debug('censys: querying %s', squery)
+        results = api.search(squery)
         records = results.view_all()
-        log.info('censys: found %s results for %s', len(records), search)
+        log.info('censys: found %s results for %s', len(records), squery)
         if len(records) > 20:
             log.warning('censys: a large number of findings here is abnormal. review results carefully!')
         for result in records:
