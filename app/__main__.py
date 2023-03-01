@@ -4,6 +4,7 @@ import os
 import sys
 import logging
 import argparse
+
 import cryptocurrency
 import getpage
 import headers
@@ -11,6 +12,7 @@ import favicon
 import pagespider
 import title
 import portscan
+import pathfuzz
 import configcheck
 import opendir
 import shodansearch
@@ -54,6 +56,7 @@ print(
 ''')
 
 cliart.prints()
+
 if args.clearnet is True:
     logging.critical('clearnet routing enabled..')
     torstate = False
@@ -61,10 +64,11 @@ else:
     logging.debug('tor routing enabled..')
     torstate = True
     preflight()
+
 if not validurl(args.target):
     if validurl('http://' + args.target):
-        logging.warning('no protocol found, appending http:// to target')
         args.target = 'http://' + args.target
+        logging.warning('no protocol provided, appending (now: %s)', args.target)
     else:
         logging.critical('failed to parse url - ensure a protocol is specified')
         sys.exit(1)
@@ -75,19 +79,20 @@ if fqdn.endswith('.onion'):
         sys.exit(1)
 url_base = getbaseurl(args.target)
 logging.debug('target: %s url_base: %s fqdn: %s', args.target, url_base, fqdn)
-if args.target.startswith('https'):
-    targetport = getport(args.target)
-    getcert_data = getcert.main(fqdn, port=targetport)
 requestobject = getpage.main(args.target, usetor=torstate)
 if requestobject is None:
     logging.error('failed to retrieve page')
     sys.exit(1)
 if requestobject.status_code != 200:
     logging.warning('unexpected response code: %s', requestobject.status_code)
+if args.target.startswith('https'):
+    targetport = getport(args.target)
+    getcert_data = getcert.main(fqdn, port=targetport)
+pathfuzz.main(args.target, usetor=torstate)
 title.main(requestobject)
 header_data = headers.main(requestobject)
 configcheck.main(args.target, usetor=torstate)
-pagespider_data = pagespider.main(args.target, requestobject)
+pagespider_data = pagespider.main(args.target, requestobject, usetor=torstate)
 favicon_data = favicon.main(url_base, requestobject, usetor=torstate)
 for item in pagespider_data['internal']:
     itemsource = getpage.main(item)
