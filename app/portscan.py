@@ -66,7 +66,7 @@ nmap -sT -PN -n -sV --open -oX - --top-ports %s \
     if usetor:
         gen_chainconfig()
         command = 'proxychains4 -f ../proxychains.conf ' + command
-    log.info('commencing portscan on %s - cmd: %s', fqdn, command)
+    log.info('commencing portscan on %s', fqdn)
     log.debug('command: %s', command)
     output = subprocess.run(command, shell=True, capture_output=True, text=True, check=True)
     scanout = json.loads(output.stdout)
