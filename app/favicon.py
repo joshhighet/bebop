@@ -3,15 +3,21 @@
 import mmh3
 import codecs
 import logging
+import hashlib
 from bs4 import BeautifulSoup
 
 import getpage
 import shodansearch
+import bedgesearch
+import censyssearch
 
 log = logging.getLogger(__name__)
 
 def getmmh3(encodedfavicon):
     return mmh3.hash(encodedfavicon)
+
+def getmd5(encodedfavicon):
+    return hashlib.md5(encodedfavicon).hexdigest()
 
 def commonhash(faviconmmh3):
     with open('common/favicon-hashes.txt', 'r', encoding='utf-8') as f:
@@ -49,11 +55,12 @@ def getfavicon64(domain, requestobject, usetor=True):
     favicon64 = codecs.encode(favicondata.content,"base64")
     return favicon64
 
-def main(domain, requestobject, doshodan=True, usetor=True):
+def main(domain, requestobject, doshodan=True, usetor=True, docensys=True, dobedge=True):
     favicon64 = getfavicon64(domain, requestobject, usetor=usetor)
     if favicon64 is None:
         return None
     faviconmmh3 = getmmh3(favicon64)
+    faviconmd5 = getmd5(favicon64)
     log.info('favicon mmh3: %s', faviconmmh3)
     if commonhash(faviconmmh3) is True:
         log.warn('favicon found in common hashlist, unlikely a unique asset - skipping shodan')
@@ -62,4 +69,8 @@ def main(domain, requestobject, doshodan=True, usetor=True):
         return faviconmmh3
     if doshodan is True:
         shodansearch.query('http.favicon.hash:' + str(faviconmmh3))
+    if docensys is True:
+        censyssearch.query('services.http.response.favicons.md5_hash:' + str(faviconmd5))
+    if dobedge is True:
+        bedgesearch.query('web.favicon.mmh3:' + str(faviconmmh3))
     return faviconmmh3

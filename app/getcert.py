@@ -10,6 +10,8 @@ from cryptography import x509
 from cryptography.x509.oid import NameOID
 
 import shodansearch
+import censyssearch
+import bedgesearch
 from utilities import getproxyvalue
 
 sockshost = getproxyvalue()[0]
@@ -52,7 +54,7 @@ def get_subject(cert):
     except x509.ExtensionNotFound:
         return None
 
-def main(fqdn, port, usetor=True, doshodan=True):
+def main(fqdn, port, usetor=True, doshodan=True, docensys=True, dobedge=True):
     if port is None:
         logging.debug('port not specified, defaulting to 443')
         port = 443
@@ -79,8 +81,13 @@ def main(fqdn, port, usetor=True, doshodan=True):
     crypto_cert = cert.to_cryptography()
     sock_ssl.close()
     sock.close()
-    if doshodan is True and commonserial(crypto_cert.serial_number) is False:
-        shodansearch.query('ssl.cert.serial:"' + str(crypto_cert.serial_number) + '"')
+    if commonserial(crypto_cert.serial_number) is False:
+        if doshodan is True:
+            shodansearch.query('ssl.cert.serial:"' + str(crypto_cert.serial_number) + '"')
+        if docensys is True:
+            censyssearch.query('services.tls.certificates.leaf_data.subject.serial_number:"' + str(crypto_cert.serial_number) + '"')
+        if dobedge is True:
+            bedgesearch.query('ssl.cert.serial:"' + str(crypto_cert.serial_number) + '"')
     else:
         logging.debug('serial number match in common list, not searching shodan')
     data = {

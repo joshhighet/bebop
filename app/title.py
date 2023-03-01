@@ -6,6 +6,7 @@ from bs4 import BeautifulSoup
 
 import shodansearch
 import censyssearch
+import bedgesearch
 
 log = logging.getLogger(__name__)
 warnings.filterwarnings("ignore", category=UserWarning, module='bs4')
@@ -16,7 +17,7 @@ with open('common/http-titles.txt', 'r', encoding='utf-8') as common_titles_file
         common_titles.append(line.strip())
     common_titles_file.close()
 
-def main(requestobject, doshodan=True, docensys=True):
+def main(requestobject, doshodan=True, docensys=True, dobedge=True):
     if len(requestobject.text.splitlines()) == 1:
         log.error('single line response, not parsing')
         return None
@@ -29,7 +30,8 @@ def main(requestobject, doshodan=True, docensys=True):
         if docensys and title.text not in common_titles:
             querystr = 'services.http.response.html_title:"' + title.text + '"'
             censyssearch.query(querystr)
+        if dobedge and title.text not in common_titles:
+            bedgesearch.query('web.title:"' + title.text + '"')
         return title.text
     log.error('no title found on page')
-    #log.debug('page source: %s', requestobject.text)
     return None

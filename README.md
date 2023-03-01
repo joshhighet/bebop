@@ -16,6 +16,7 @@ graph LR
         subgraph netscans[scan data]
         shodan
         censys
+        binaryedge
         end
     end
     lookupsaver[(if rare value)]
@@ -32,10 +33,10 @@ graph LR
     checker -..-> checks
     mainget --> favicon[get favicon fuzzyhash]
     mainget --> sslserial[get ssl serial]
-    sslserial --> |ssl.cert.serial| lookupsaver
-    favicon --> |http.favicon.hash| lookupsaver
+    sslserial --> lookupsaver
+    favicon --> lookupsaver
     mainget --> title[fetch page title]
-    title --> |http.title| lookupsaver
+    title --> lookupsaver
     mainget --> headers[inspect headers]
     headers --> |if etag|netscans
     lookupsaver --> netscans
@@ -175,11 +176,16 @@ docker build --build-arg SOCKS_HOST=10.20.30.40 --build-arg SOCKS_PORT=8080 bebo
 
 if given credentials, both censys & shodan can be used to for enrichment, see the above diagram for specific use criteria
 
+_using one, any or all external data repositories is optional and only done when authorisation parameters are explicitly provided_
+
 - to leverage Censys, provide both your `CENSYS_API_ID` and the accompanying `CENSYS_API_SECRET`.
 > you can fetch this from [search.censys.io/account/api](https://search.censys.io/account/api)
 
 - to leverage Shodan, provide your `SHODAN_API_KEY`.
 > you can fetch this from [account.shodan.io](https://account.shodan.io)
+
+- to leverage Binaryedge, provide your `BINARYEDGE_API_KEY`
+> you can fetch this from [app.binaryedge.io/account/api](https://app.binaryedge.io/account/api)
 
 if you have already built the image locally, run
 
@@ -198,6 +204,7 @@ docker run \
 -e SHODAN_API_KEY=yourkey \
 -e CENSYS_API_ID=yourid \
 -e CENSYS_API_SECRET=yourkey \
+-e BINARYEDGE_API_KEY=yourkey \
 ghcr.io/joshhighet/bebop:latest http://ciadotgov4sjwlzihbbgxnqg3xiyrg7so2r2o3lt5wz5ypk4sxyjstad.onion
 ```
 

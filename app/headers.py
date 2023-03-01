@@ -3,6 +3,8 @@
 import logging
 
 import shodansearch
+import censyssearch
+import bedgesearch
 
 log = logging.getLogger(__name__)
 
@@ -12,7 +14,7 @@ with open('common/headers.txt', 'r', encoding='utf-8') as common_headers_file:
         common_headers.append(line.strip())
     common_headers_file.close()
 
-def main(siterequest, doshodan=True):
+def main(siterequest, doshodan=True, docensys=True, dobedge=True):
     data = {
         'etag': None,
         'server': None,
@@ -38,6 +40,11 @@ def main(siterequest, doshodan=True):
             data['interesting_headers'].append(hedr + ':' + siterequest.headers[hedr])
         else:
             log.debug('header: ' + hedr + ' ' + siterequest.headers[hedr])
-    if doshodan and data['etag'] is not None:
-        shodansearch.query(data['etag'])
+    if data['etag'] is not None:
+        if doshodan:
+            shodansearch.query(data['etag'])
+        if docensys:
+            censyssearch.query(data['etag'])
+        if dobedge:
+            bedgesearch.query(data['etag'])
     return data
