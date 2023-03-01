@@ -16,7 +16,7 @@ def nsresolve(fqdn):
         return socket.gethostbyname(fqdn)
     except socket.gaierror:
         return None
-    
+
 def validurl(url):
     urlregex = re.compile(
         r'^(?:http)s?://'
@@ -33,7 +33,7 @@ def getproxyvalue():
     if nsresolve('host.docker.internal') is not None:
         socksaddr = os.environ.get('SOCKS_HOST', 'host.docker.internal')
     else:
-        socksaddr = os.environ.get('SOCKS_HOST', 'localhost')
+        socksaddr = os.environ.get('SOCKS_HOST', '127.0.0.1')
     return socksaddr, socksport
 
 file_checks = ['proxychains.conf', 'common/headers.txt']
@@ -72,7 +72,7 @@ def getfqdn(url):
     if url_object.subdomain:
         return url_object.subdomain + '.' + url_object.domain + '.' + url_object.suffix
     return url_object.domain + '.' + url_object.suffix\
-        
+
 def getport(url):
     url_object = urlparse(url)
     if url_object.port is None:
