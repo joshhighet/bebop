@@ -1,11 +1,14 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-import getpage
 import logging
+import requests
+
 log = logging.getLogger(__name__)
+requests.packages.urllib3.disable_warnings()
 
 import title
+from utilities import getsocks
 
 interesting_paths = [
     {'uri': '/server-status', 'code': 200, 'text': 'Apache'},
@@ -17,20 +20,31 @@ interesting_paths = [
 def main(location, usetor=True):
     if location.endswith('/'):
         location = location[:-1]
-    for path in interesting_paths:
-        log.info('scanning %s - expecting %s', location + path['uri'], path['code'])
-        page = getpage.main(location + path['uri'], usetor=usetor)
-        if page is None:
-            log.error('no response from {}'.format(location + path['uri']))
-            continue
-        if page.status_code == path['code']:
-            title.main(page)
-            if path['text'] is None:
-                log.info('found {} at {}'.format(path['code'], location + path['uri']))
-            else:
-                if path['text'] in page.text:
-                    log.info('found {} at {}'.format(path['code'], location + path['uri']))
+    if usetor:
+        reqproxies = getsocks()
+    else:
+        reqproxies = None
+    logging.debug('requesting: %s - usetor:%s', location, usetor)
+    logging.debug('using proxies: %s', reqproxies)
+    with requests.Session() as session:
+        for path in interesting_paths:
+            uri = location + path['uri']
+            log.info('scanning %s - expecting %s', uri, path['code'])
+            try:
+                response = session.get(uri, proxies=reqproxies, verify=False, timeout=30, allow_redirects=True)
+            except requests.exceptions.ConnectionError as rece:
+                log.error(rece)
+            except requests.exceptions.Timeout as ret:
+                log.error(ret)
+            if response.status_code == path['code']:
+                title.main(response)
+                if path['text'] is None:
+                    log.info(f'found {path["code"]} at {uri}')
+                elif path['text'] in response.text:
+                    log.info(f'found {path["code"]} at {uri}')
                 else:
-                    log.debug('found {} at {} but no match for {}'.format(path['code'], location + path['uri'], path['text']))
-        else:
-            log.debug('found {} at {}'.format(page.status_code, location + path['uri']))
+                    log.debug(f'found {path["code"]} at {uri} but no match for {path["text"]}')
+            else:
+                log.debug(f'found {response.status_code} at {uri}')
+            if any(path['code'] == response.status_code and (path['text'] is None or path['text'] in response.text) for path in interesting_paths):
+                break
