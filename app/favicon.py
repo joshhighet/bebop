@@ -30,6 +30,8 @@ def getfavicon64(domain, requestobject, usetor=True):
         location = domain + '/favicon.ico'
     else:
         location = icon_link["href"]
+        if not location.startswith('/') and '/' in location:
+            location = '/' + location
         if icon_link["href"].startswith('data:image/'):
             favicon64 = icon_link["href"].split(',')[1]
             return favicon64
