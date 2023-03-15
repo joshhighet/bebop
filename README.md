@@ -88,14 +88,6 @@ leverage any existing infrastructure, create your own or follow one of the below
     
 by default, the proxy location is set to `host.docker.internal:9050` - this can be overwrote through environment variables, refer to the `building` section for more
 
-### dockerfile
-
-the [dockerfile](app/dockerfile) is fairly stock standard aside from a set of `sed` commands
-
-these are used to modify the location of the target SOCKS proxy within [proxychains.conf](app/proxychains.conf)
-
-you may need to alter the target SOCKS proxy location - this can bbe done with environment variables `SOCKS_HOST` & `SOCKS_PORT`
-
 ### page spider
 
 [pagespider.py](app/pagespider.py) simply parses the given source code and returens two objects;
@@ -125,7 +117,8 @@ if the response object is unknown or there is uncertainty with string-matches, u
 
 - the favicon discovery will attempt to parse the icon from any HTML, falling back to hardcoded paths
 - if found, the favicon is downloaded and an [MurmurHash](https://commons.apache.org/proper/commons-codec/apidocs/org/apache/commons/codec/digest/MurmurHash3.html) is computed
-- the hash is searched against <todo>
+- the hash is searched against the following engines where credentials are provided
+`shodan:http.favicon.hash`, `censys:services.http.response.favicons.md5_hash`, `binaryedge:web.favicon.mmh3` & `zoomeye:iconhash`
 
 _to avoid noise, a list of the top 200 favicons have been added to this repository - if a finding is matched, it will not be considered unique - see the housekeeping section for details_
 
