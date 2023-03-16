@@ -73,10 +73,10 @@ you will need to make a Tor routable SOCKS5 proxy available to this image
 
 leverage any existing infrastructure, create your own or follow one of the below methods
 
-1. create a simple single-relay proxy with [joshhighet/gotham/torproxy](https://github.com/joshhighet/gotham/pkgs/container/gotham%2Ftorproxy)
+1. create a simple single-relay proxy with [joshhighet/torsocc](https://github.com/joshhighet/torsocc/pkgs/container/torsocc)
 
     ```shell
-    docker run -p9050:9050 ghcr.io/joshhighet/gotham/torproxy:latest
+    docker run -p9050:9050 ghcr.io/joshhighet/torsocc:latest
     ```
 
 2. making a large number of requests? - consider leveraging [joshhighet/multisocks](https://github.com/joshhighet/multisocks), an haproxy balanced relay framework
