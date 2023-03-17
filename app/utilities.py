@@ -87,14 +87,18 @@ def getbaseurl(url):
         return url
     return urlparse_object.scheme + '://' + urlparse_object.netloc
 
-def getsocks():
+def getsocks(aio_fmt=False):
     proxy = getproxyvalue()
     if not checktcp(proxy[0], proxy[1]):
         log.critical('failed socks5 preflight socket check (%s:%s)', proxy[0], proxy[1])
         sys.exit(1)
+    if aio_fmt:
+        proto = 'socks5'
+    else:
+        proto = 'socks5h'
     oproxies = {
-        'http':  'socks5h://' + proxy[0] + ':' + str(proxy[1]),
-        'https': 'socks5h://' + proxy[0] + ':' + str(proxy[1])
+        'http':  proto + '://' + proxy[0] + ':' + str(proxy[1]),
+        'https': proto + '://' + proxy[0] + ':' + str(proxy[1])
     }
     return oproxies
 
