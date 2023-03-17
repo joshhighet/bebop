@@ -7,10 +7,7 @@ import hashlib
 from bs4 import BeautifulSoup
 
 import getpage
-import shodansearch
-import bedgesearch
-import censyssearch
-import zoomeyesearch
+import subprocessors
 
 log = logging.getLogger(__name__)
 
@@ -69,11 +66,11 @@ def main(domain, requestobject, doshodan=True, usetor=True, docensys=True, dobed
         log.debug(direct_url)
         return faviconmmh3
     if doshodan is True:
-        shodansearch.query('http.favicon.hash:' + str(faviconmmh3))
+        subprocessors.query_shodan('http.favicon.hash:' + str(faviconmmh3))
     if docensys is True:
-        censyssearch.query('services.http.response.favicons.md5_hash:' + str(faviconmd5))
+        subprocessors.query_censys('services.http.response.favicons.md5_hash:' + str(faviconmd5))
     if dobedge is True:
-        bedgesearch.query('web.favicon.mmh3:' + str(faviconmmh3))
+        subprocessors.query_binaryedge('web.favicon.mmh3:' + str(faviconmmh3))
     if dozoome is True:
-        zoomeyesearch.query('iconhash:' + str(faviconmmh3))
+        subprocessors.query_zoomeye('iconhash:' + str(faviconmmh3))
     return faviconmmh3

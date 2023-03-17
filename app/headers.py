@@ -2,10 +2,7 @@
 # -*- coding: utf-8 -*-
 import logging
 
-import shodansearch
-import censyssearch
-import bedgesearch
-import zoomeyesearch
+import subprocessors
 
 log = logging.getLogger(__name__)
 
@@ -43,11 +40,11 @@ def main(siterequest, doshodan=True, docensys=True, dobedge=True, dozoome=True):
             log.debug('header: ' + hedr + ' ' + siterequest.headers[hedr])
     if data['etag'] is not None:
         if doshodan:
-            shodansearch.query(data['etag'])
+            subprocessors.query_shodan(data['etag'])
         if docensys:
-            censyssearch.query(data['etag'])
+            subprocessors.query_censys(data['etag'])
         if dobedge:
-            bedgesearch.query(data['etag'])
+            subprocessors.query_bedge(data['etag'])
         if dozoome:
-            zoomeyesearch.query(data['etag'])
+            subprocessors.query_zoomeye(data['etag'])
     return data

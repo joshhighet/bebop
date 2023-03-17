@@ -4,10 +4,7 @@ import logging
 import warnings
 from bs4 import BeautifulSoup
 
-import shodansearch
-import censyssearch
-import bedgesearch
-import zoomeyesearch
+import subprocessors
 
 log = logging.getLogger(__name__)
 warnings.filterwarnings("ignore", category=UserWarning, module='bs4')
@@ -28,14 +25,14 @@ def main(requestobject, doshodan=True, docensys=True, dobedge=True, dozoome=True
         log.info('title: %s', title.text)
         if title.text not in common_titles:
             if doshodan:
-                shodansearch.query('http.title:"' + title.text + '"')
+                subprocessors.query_shodan('http.title:"' + title.text + '"')
             if docensys:
                 querystr = 'services.http.response.html_title:"' + title.text + '"'
-                censyssearch.query(querystr)
+                subprocessors.query_censys(querystr)
             if dobedge:
-                bedgesearch.query('web.title:"' + title.text + '"')
+                subprocessors.query_binaryedge('web.title:"' + title.text + '"')
             if dozoome:
-                zoomeyesearch.query('title:"' + title.text + '"')
+                subprocessors.query_zoomeye('title:"' + title.text + '"')
         return title.text
     log.error('no title found on page')
     return None

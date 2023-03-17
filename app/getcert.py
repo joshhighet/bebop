@@ -9,10 +9,7 @@ import socket
 from cryptography import x509
 from cryptography.x509.oid import NameOID
 
-import shodansearch
-import censyssearch
-import bedgesearch
-import zoomeyesearch
+import subprocessors
 from utilities import getproxyvalue
 
 sockshost = getproxyvalue()[0]
@@ -84,13 +81,13 @@ def main(fqdn, port, usetor=True, doshodan=True, docensys=True, dobedge=True, do
     sock.close()
     if commonserial(crypto_cert.serial_number) is False:
         if doshodan is True:
-            shodansearch.query('ssl.cert.serial:"' + str(crypto_cert.serial_number) + '"')
+            subprocessors.query_shodan('ssl.cert.serial:"' + str(crypto_cert.serial_number) + '"')
         if docensys is True:
-            censyssearch.query('services.tls.certificates.leaf_data.subject.serial_number:"' + str(crypto_cert.serial_number) + '"')
+            subprocessors.query_censys('services.tls.certificates.leaf_data.subject.serial_number:"' + str(crypto_cert.serial_number) + '"')
         if dobedge is True:
-            bedgesearch.query('ssl.cert.serial:"' + str(crypto_cert.serial_number) + '"')
+            subprocessors.query_binaryedge('ssl.cert.serial:"' + str(crypto_cert.serial_number) + '"')
         if dozoome is True:
-            zoomeyesearch.query('ssl.cert.serial:"' + str(crypto_cert.serial_number) + '"')
+            subprocessors.query_zoomeye('ssl.cert.serial:"' + str(crypto_cert.serial_number) + '"')
     else:
         logging.debug('serial number match in common list, not searching shodan')
     data = {
