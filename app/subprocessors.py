@@ -14,6 +14,7 @@ BINARYEDGE_API_KEY = os.getenv('BINARYEDGE_API_KEY', None)
 CENSYS_API_ID = os.getenv('CENSYS_API_ID', None)
 CENSYS_API_SECRET = os.getenv('CENSYS_API_SECRET', None)
 SHODAN_API_KEY = os.getenv('SHODAN_API_KEY', None)
+FOFA_API_KEY = os.getenv('FOFA_API_KEY', None)
 
 if CENSYS_API_SECRET and CENSYS_API_ID:
     censys_api = CensysHosts(api_id=CENSYS_API_ID, api_secret=CENSYS_API_SECRET)
@@ -130,16 +131,46 @@ def query_shodan(squery):
         log.error('shodan: api error: %s', sae)
     return findings
 
+def query_fofa(squery):
+    findings = []
+    if not FOFA_API_KEY:
+        log.error("fofa: without an api key queries are skipped")
+        return findings
+    if not squery:
+        log.error("fofa: no query provided")
+        return findings
+    log.debug('fofa: querying %s', squery)
+    try:
+        results = requests.get('https://fofa.so/api/v1/search/all',
+                               params={'q': squery, 'fields': 'ip,port,banner', 'size': 20, 'page': 1},
+                               headers={'Authorization': FOFA_API_KEY})
+        results.raise_for_status()
+    except requests.exceptions.RequestException as e:
+        log.error('fofa: api error: %s', e)
+        return findings
+    results_data = results.json()
+    total_results = results_data['size']
+    log.info('fofa: found %s results for %s', total_results, squery)
+    if total_results <= 20:
+        for result in results_data['results']:
+            findings.append(result)
+            log.debug('fofa: found %s', result)
+    else:
+        log.warning('fofa: more than 20 results found. skipping query as it is not deemed rare.')
+    return findings
+
 def main(query=None):
     zoomeye_results = query_zoomeye(query)
     binaryedge_results = query_binaryedge(query)
     censys_results = query_censys(query)
     shodan_results = query_shodan(query)
+    fofa_results = query_fofa(query)
     results = {
         'zoomeye': zoomeye_results,
         'binaryedge': binaryedge_results,
         'censys': censys_results,
         'shodan': shodan_results,
+        'fofa': fofa_results
     }
     return results
 
