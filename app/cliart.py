@@ -20,7 +20,7 @@ phrases = [
     "to infinity and beyond!"
 ]
 
-bar = [
+bars = [
     " [=                                                                ]",
     " [    =                                                            ]",
     " [         =                                                       ]",
@@ -43,7 +43,7 @@ def prints():
     middle = int((68 - len(beep)) / 2)
     print(" " * middle + beep)
     for i in range(28):
-        print(bar[i % len(bar)], end="\r")
+        print(bars[i % len(bars)], end="\r")
         time.sleep(.03)
         i += 1
     print()
