@@ -15,7 +15,7 @@ with open('common/http-titles.txt', 'r', encoding='utf-8') as common_titles_file
         common_titles.append(line.strip())
     common_titles_file.close()
 
-def main(requestobject, doshodan=True, docensys=True, dobedge=True, dozoome=True):
+def main(requestobject, doshodan=True, docensys=True, dobedge=True, dozoome=True, dofofa=True):
     if len(requestobject.text.splitlines()) == 1:
         log.error('single line response, not parsing')
         return None
@@ -33,6 +33,8 @@ def main(requestobject, doshodan=True, docensys=True, dobedge=True, dozoome=True
                 subprocessors.query_binaryedge('web.title:"' + title.text + '"')
             if dozoome:
                 subprocessors.query_zoomeye('title:"' + title.text + '"')
+            if dofofa:
+                subprocessors.query_fofa('title=' + str(title.text))
         return title.text
     log.error('no title found on page')
     return None

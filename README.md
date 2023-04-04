@@ -182,7 +182,8 @@ _using one, any or all external data repositories is optional and only done when
 > you can fetch this from [account.shodan.io](https://account.shodan.io)
 
 - to leverage FOFA, provide your `FOFA_API_KEY`. note there is no Free API tier
-> you can fetch this from [en.fofa.info](https://en.fofa.info/userInfo)
+> you can fetch this from [en.fofa.info](https://en.fofa.info/userInfo). note a business plan is required to search by `icon_hash`
+
 
 - to leverage Binaryedge, provide your `BINARYEDGE_API_KEY`
 > you can fetch this from [app.binaryedge.io/account/api](https://app.binaryedge.io/account/api)

@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 import os
 import json
+import base64
 import logging
 import requests
 from censys.search import CensysHosts
@@ -15,6 +16,7 @@ CENSYS_API_ID = os.getenv('CENSYS_API_ID', None)
 CENSYS_API_SECRET = os.getenv('CENSYS_API_SECRET', None)
 SHODAN_API_KEY = os.getenv('SHODAN_API_KEY', None)
 FOFA_API_KEY = os.getenv('FOFA_API_KEY', None)
+FOFA_API_MAIL = os.getenv('FOFA_API_MAIL', None)
 
 if CENSYS_API_SECRET and CENSYS_API_ID:
     censys_api = CensysHosts(api_id=CENSYS_API_ID, api_secret=CENSYS_API_SECRET)
@@ -132,18 +134,29 @@ def query_shodan(squery):
     return findings
 
 def query_fofa(squery):
+    '''
+    https://en.fofa.info/api
+    '''
     findings = []
-    if not FOFA_API_KEY:
-        log.error("fofa: without an api key queries are skipped")
+    if not FOFA_API_KEY or not FOFA_API_MAIL:
+        log.error("fofa: without an api key and email queries are skipped")
         return findings
     if not squery:
         log.error("fofa: no query provided")
         return findings
-    log.debug('fofa: querying %s', squery)
+    query64 = base64.b64encode(squery.encode('utf-8'))
+    log.debug('fofa: querying %s (%s)', squery, query64)
     try:
-        results = requests.get('https://fofa.so/api/v1/search/all',
-                               params={'q': squery, 'fields': 'ip,port,banner', 'size': 20, 'page': 1},
-                               headers={'Authorization': FOFA_API_KEY})
+        results = requests.get('https://fofa.info/api/v1/search/all',
+                               params={
+                                   'qbase64': query64,
+                                   'fields': 'ip,port,banner',
+                                   'size': 20,
+                                   'page': 1,
+                                   'key': FOFA_API_KEY,
+                                   'email': FOFA_API_MAIL
+                                }
+        )
         results.raise_for_status()
     except requests.exceptions.RequestException as e:
         log.error('fofa: api error: %s', e)
@@ -158,22 +171,3 @@ def query_fofa(squery):
     else:
         log.warning('fofa: more than 20 results found. skipping query as it is not deemed rare.')
     return findings
-
-def main(query=None):
-    zoomeye_results = query_zoomeye(query)
-    binaryedge_results = query_binaryedge(query)
-    censys_results = query_censys(query)
-    shodan_results = query_shodan(query)
-    fofa_results = query_fofa(query)
-    results = {
-        'zoomeye': zoomeye_results,
-        'binaryedge': binaryedge_results,
-        'censys': censys_results,
-        'shodan': shodan_results,
-        'fofa': fofa_results
-    }
-    return results
-
-if __name__ == '__main__':
-    results = main('ip:1.1.1.1')
-    print(json.dumps(results, indent=4))

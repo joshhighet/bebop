@@ -52,7 +52,7 @@ def get_subject(cert):
     except x509.ExtensionNotFound:
         return None
 
-def main(fqdn, port, usetor=True, doshodan=True, docensys=True, dobedge=True, dozoome=True):
+def main(fqdn, port, usetor=True, doshodan=True, docensys=True, dobedge=True, dozoome=True, dofofa=True):
     if port is None:
         logging.debug('port not specified, defaulting to 443')
         port = 443
@@ -89,6 +89,8 @@ def main(fqdn, port, usetor=True, doshodan=True, docensys=True, dobedge=True, do
             subprocessors.query_binaryedge('ssl.cert.serial:"' + str(crypto_cert.serial_number) + '"')
         if dozoome is True:
             subprocessors.query_zoomeye('ssl.cert.serial:"' + str(crypto_cert.serial_number) + '"')
+        if dofofa is True:
+            subprocessors.query_fofa('cert=' + str(crypto_cert.serial_number))
     else:
         logging.debug('serial number match in common list, not searching shodan')
     data = {

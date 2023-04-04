@@ -42,7 +42,7 @@ def getfavicon64(domain, requestobject, usetor=True):
     favicon64 = codecs.encode(favicondata.content, "base64")
     return favicon64
 
-def main(domain, requestobject, doshodan=True, usetor=True, docensys=True, dobedge=True, dozoome=True):
+def main(domain, requestobject, doshodan=True, usetor=True, docensys=True, dobedge=True, dozoome=True, dofofa=True):
     favicon64 = getfavicon64(domain, requestobject, usetor=usetor)
     if favicon64 is None:
         return None
@@ -62,4 +62,6 @@ def main(domain, requestobject, doshodan=True, usetor=True, docensys=True, dobed
         subprocessors.query_binaryedge('web.favicon.mmh3:' + str(faviconmmh3))
     if dozoome is True:
         subprocessors.query_zoomeye('iconhash:' + str(faviconmmh3))
+    if dofofa is True:
+        subprocessors.query_fofa('icon_hash=' + str(faviconmmh3))
     return faviconmmh3
