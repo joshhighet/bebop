@@ -3,9 +3,9 @@
 # https://cryptography.io/en/latest/x509/reference/
 import idna
 import socks
+import socket
 import logging
 from OpenSSL import SSL
-import socket
 from cryptography import x509
 from cryptography.x509.oid import NameOID
 
@@ -83,7 +83,8 @@ def main(fqdn, port, usetor=True, doshodan=True, docensys=True, dobedge=True, do
         if doshodan is True:
             subprocessors.query_shodan('ssl.cert.serial:"' + str(crypto_cert.serial_number) + '"')
         if docensys is True:
-            subprocessors.query_censys('services.tls.certificates.leaf_data.subject.serial_number:"' + str(crypto_cert.serial_number) + '"')
+            querystr = 'services.tls.certificates.leaf_data.subject.serial_number:"' + str(crypto_cert.serial_number) + '"'
+            subprocessors.query_censys(querystr)
         if dobedge is True:
             subprocessors.query_binaryedge('ssl.cert.serial:"' + str(crypto_cert.serial_number) + '"')
         if dozoome is True:
