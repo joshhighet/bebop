@@ -74,8 +74,14 @@ def main(fqdn, port, usetor=True, doshodan=True, docensys=True, dobedge=True, do
     sock_ssl = SSL.Connection(ctx, sock)
     sock_ssl.set_connect_state()
     sock_ssl.set_tlsext_host_name(hostname_idna)
-    sock_ssl.do_handshake()
+    try:
+        sock_ssl.do_handshake()
+    except SSL.Error as e:
+        logging.error('ssl handshake error: %s', e)
     cert = sock_ssl.get_peer_certificate()
+    if cert is None:
+        logging.error('no certificate returned')
+        return None
     crypto_cert = cert.to_cryptography()
     sock_ssl.close()
     sock.close()
