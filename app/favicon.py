@@ -16,7 +16,9 @@ def getmmh3(encodedfavicon):
     return mmh3.hash(encodedfavicon)
 
 def getmd5(encodedfavicon):
-    return hashlib.md5(encodedfavicon).hexdigest()
+    print(encodedfavicon)
+    md5fav = hashlib.md5(encodedfavicon.encode('utf-8')).hexdigest()
+    return md5fav
 
 def commonhash(faviconmmh3):
     with open('common/favicon-hashes.txt', 'r', encoding='utf-8') as f:
