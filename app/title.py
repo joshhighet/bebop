@@ -23,7 +23,7 @@ def main(requestobject, doshodan=True, docensys=True, dobedge=True, dozoome=True
     title = soup.find('title')
     if title is not None:
         log.info('title: %s', title.text)
-        if title.text not in common_titles:
+        if title.text not in common_titles and len(title.text) > 0:
             if doshodan:
                 subprocessors.query_shodan('http.title:"' + title.text + '"')
             if docensys:
