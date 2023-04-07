@@ -162,6 +162,12 @@ def query_fofa(squery):
         log.error('fofa: api error: %s', e)
         return findings
     results_data = results.json()
+    if 'errmsg' in results_data:
+        if '[820019]' in results_data['errmsg']:
+            log.error('fofa: icon_hash queries are not supported on basic plans.')
+            return findings
+        log.error('fofa: unknown api error: %s', results_data['errmsg'])
+        return findings
     total_results = results_data['size']
     log.info('fofa: found %s results for %s', total_results, squery)
     if total_results <= 20:
