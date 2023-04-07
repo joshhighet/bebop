@@ -44,7 +44,7 @@ def main(siterequest, doshodan=True, docensys=True, dobedge=True, dozoome=True, 
         if docensys:
             subprocessors.query_censys(data['etag'])
         if dobedge:
-            subprocessors.query_bedge(data['etag'])
+            subprocessors.query_binaryedge(data['etag'])
         if dozoome:
             subprocessors.query_zoomeye(data['etag'])
         if dofofa:
