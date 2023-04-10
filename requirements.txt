@@ -2,8 +2,9 @@ yq
 mmh3
 lxml
 shodan
-pyOpenSSL
 censys
+pytest
+pyOpenSSL
 tldextract
 aiohttp_socks
 BeautifulSoup4
