@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 import time
 import random
+
 phrases = [
     "charging the lazers...",
     "shopping for onions...",
@@ -17,7 +18,14 @@ phrases = [
     "better out than in, i always say...",
     "E.T. phone home...",
     "just keep swimming...",
-    "to infinity and beyond!"
+    "to infinity and beyond!",
+    "gathering moon rocks...",
+    "organizing the penguin parade...",
+    "initializing the flux capacitor...",
+    "calibrating the sonic screwdriver...",
+    "unleashing the kraken...",
+    "initiating protocol 42...",
+    "defragging the hyperspace drive..."
 ]
 
 bars = [
