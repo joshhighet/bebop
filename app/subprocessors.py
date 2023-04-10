@@ -93,14 +93,13 @@ def query_censys(squery):
         return findings
     try:
         log.debug('censys: querying %s', squery)
-        results = censys_api.search(squery)
-        records = results.view_all()
-        total_results = len(records)
+        results = censys_api.search(squery, per_page=30)
+        total_results = len(results())
         log.info('censys: found %s results for %s', total_results, squery)
         if total_results <= 20:
-            for result in records:
+            for result in records():
                 findings.append(result)
-                log.debug('censys: found %s', result)
+                log.debug('censys: found %s', result['ip'])
         else:
             log.warning('censys: more than 20 results found. skipping query as it is not deemed rare.')
     except CensysException as ce:
