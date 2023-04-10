@@ -14,6 +14,7 @@ from utilities import getsocks, useragentstr
 
 interesting_paths = [
     {'uri': '/server-status', 'code': 200, 'text': 'Apache'},
+    {'uri': '/install/index.php', 'code': 200, 'text': 'Installation Wizard'},
     {'uri': '/server-info', 'code': 200, 'text': 'Apache'},
     {'uri': '/wp-login.php', 'code': 200, 'text': 'login'},
     {'uri': '/xmlrpc.php', 'code': 405, 'text': 'XML-RPC server accepts POST requests only'},
@@ -79,7 +80,37 @@ interesting_paths = [
     {'uri': '/git', 'code': 200, 'text': 'GitLab'},
     {'uri': '/composer.lock', 'code': 200, 'text': None},
     {'uri': '/package-lock.json', 'code': 200, 'text': None},
-    {'uri': '/yarn.lock', 'code': 200, 'text': None}
+    {'uri': '/yarn.lock', 'code': 200, 'text': None},
+    {'uri': '/.TemporaryItems', 'code': 200, 'text': None},
+    {'uri': '/.access.php', 'code': 200, 'text': None},
+    {'uri': '/.buildpath', 'code': 200, 'text': None},
+    {'uri': '/.env.example', 'code': 200, 'text': None},
+    {'uri': '/.ftpquota', 'code': 200, 'text': None},
+    {'uri': '/.gitattributes', 'code': 200, 'text': None},
+    {'uri': '/.github', 'code': 200, 'text': None},
+    {'uri': '/.gitignore', 'code': 200, 'text': None},
+    {'uri': '/.hg', 'code': 200, 'text': None},
+    {'uri': '/.hgignore', 'code': 200, 'text': None},
+    {'uri': '/.htaccess', 'code': 200, 'text': None},
+    {'uri': '/.htpasswd', 'code': 200, 'text': None},
+    {'uri': '/.htpasswds', 'code': 200, 'text': None},
+    {'uri': '/.idea', 'code': 200, 'text': None},
+    {'uri': '/.localized', 'code': 200, 'text': None},
+    {'uri': '/.platform', 'code': 200, 'text': None},
+    {'uri': '/.project', 'code': 200, 'text': None},
+    {'uri': '/.qidb', 'code': 200, 'text': None},
+    {'uri': '/.quarantine', 'code': 200, 'text': None},
+    {'uri': '/.sass-cache', 'code': 200, 'text': None},
+    {'uri': '/.section.php', 'code': 200, 'text': None},
+    {'uri': '/.settings', 'code': 200, 'text': None},
+    {'uri': '/.smileys', 'code': 200, 'text': None},
+    {'uri': '/.styleci.yml', 'code': 200, 'text': None},
+    {'uri': '/.tmb', 'code': 200, 'text': None},
+    {'uri': '/.top.menu.php', 'code': 200, 'text': None},
+    {'uri': '/.user.ini', 'code': 200, 'text': None},
+    {'uri': '/.vscode', 'code': 200, 'text': None},
+    {'uri': '/.well-known', 'code': 200, 'text': None},
+    {'uri': '/.ini', 'code': 200, 'text': None}
 ]
 
 async def fetch(location, path, session):
@@ -121,7 +152,3 @@ async def main(location, usetor=True, max_concurrent_requests=5):
             async with sem:
                 tasks.append(fetch(location, path, session))
         await asyncio.gather(*tasks)
-
-if __name__ == '__main__':
-    logging.basicConfig(level=logging.DEBUG)
-    asyncio.run(main('https://dotco.nz', usetor=False))

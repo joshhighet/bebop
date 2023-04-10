@@ -12,7 +12,6 @@ import favicon
 import pagespider
 import title
 import portscan
-import pathfuzz
 import configcheck
 import opendir
 import getcert
@@ -86,7 +85,6 @@ if requestobject.status_code != 200:
 if args.target.startswith('https'):
     targetport = getport(args.target)
     getcert_data = getcert.main(fqdn, port=targetport)
-pathfuzz.main(args.target, usetor=torstate)
 title.main(requestobject)
 header_data = headers.main(requestobject)
 configcheck.main(args.target, usetor=torstate)
