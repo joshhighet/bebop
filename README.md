@@ -213,6 +213,10 @@ docker run \
 ghcr.io/joshhighet/bebop:latest http://ciadotgov4sjwlzihbbgxnqg3xiyrg7so2r2o3lt5wz5ypk4sxyjstad.onion
 ```
 
+## subprocessors
+
+use [assets/check-balances.py](assets/check-balances.py) to retrieve credit balances from Shodan, Binaryedge, Censys, Zoomeye & FOFA
+
 # housekeeping
 
 to avoid consuming unneccesary credits polling subprocessors a list of common results for a few tasks are stored as text files within this repo.

@@ -3,75 +3,55 @@ import json
 import requests
 import logging
 
-keys = {
-    'ZOOMEYE_API_KEY': os.getenv('ZOOMEYE_API_KEY', None),
-    'BINARYEDGE_API_KEY':os.getenv('BINARYEDGE_API_KEY', None),
-    'CENSYS_API_ID': os.getenv('CENSYS_API_ID', None),
-    'CENSYS_API_SECRET': os.getenv('CENSYS_API_SECRET', None),
-    'SHODAN_API_KEY': os.getenv('SHODAN_API_KEY', None),
-    'FOFA_API_KEY': os.getenv('FOFA_API_KEY', None),
-    'FOFA_API_MAIL': os.getenv('FOFA_API_MAIL', None)
-}
+log = logging.getLogger(__name__)
 
-for key, value in keys.items():
-    if value is None:
-        logging.error('missing key(s)!')
-        os._exit(1)
+if os.getenv('ZOOMEYE_API_KEY', None) != None:
+    zoomeye_authkey = os.getenv('ZOOMEYE_API_KEY')
+    zoomeye_data = requests.get('https://api.zoomeye.org/resources-info', headers={'API-KEY': zoomeye_authkey})
+    print('############# zoomeye')
+    print('remaining queries: {}'.format(zoomeye_data.json()['quota_info']['remain_total_quota']))
+else:
+    log.error('ZOOMEYE_API_KEY missing')
 
-def fofacheck():
+if os.getenv('BINARYEDGE_API_KEY', None) != None:
+    binaryedge_authkey = os.getenv('BINARYEDGE_API_KEY')
+    binaryedge_data = requests.get(
+        'https://api.binaryedge.io/v2/user/subscription', headers={'X-Key': binaryedge_authkey})
+    print('########## binaryedge')
+    print('credits: {}'.format(binaryedge_data.json()['requests_left']))
+else:
+    log.error('BINARYEDGE_API_KEY missing')
+
+if os.getenv('FOFA_API_KEY', None) != None:
     fofa_authkey = os.getenv('FOFA_API_KEY')
     fofa_authmail = os.getenv('FOFA_API_MAIL')
     fofa_data = requests.get(
         'https://fofa.info/api/v1/info/my?email={}&key={}'.format(fofa_authmail, fofa_authkey))
-    return fofa_data.json()
+    print('################ fofa')
+    print('coins: {}'.format(fofa_data.json()['fcoin']))
+    print('points: {}'.format(fofa_data.json()['fofa_point']))
+    print('remaining queries: {}'.format(fofa_data.json()['remain_api_query']))
+    print('remaining data: {}'.format(fofa_data.json()['remain_api_data']))
+else:
+    log.error('FOFA_API_KEY missing')
 
-def shodancheck():
+if os.getenv('SHODAN_API_KEY', None) != None:
     shodan_authkey = os.getenv('SHODAN_API_KEY')
     shodan_data = requests.get(
         'https://api.shodan.io/api-info?key={}'.format(shodan_authkey))
-    return shodan_data.json()
+    print('############## shodan')
+    print('scan credits: {}'.format(shodan_data.json()['scan_credits']))
+    print('query credits: {}'.format(shodan_data.json()['query_credits']))
+else:
+    log.error('SHODAN_API_KEY missing')
 
-def binaryedgecheck():
-    binaryedge_authkey = os.getenv('BINARYEDGE_API_KEY')
-    binaryedge_data = requests.get(
-        'https://api.binaryedge.io/v2/user/subscription', headers={'X-Key': binaryedge_authkey})
-    return binaryedge_data.json()
-
-def cenyscheck():
+if os.getenv('CENSYS_API_ID', None) != None:
     censys_authid = os.getenv('CENSYS_API_ID')
     censys_authsecret = os.getenv('CENSYS_API_SECRET')
     censys_data = requests.get(
         'https://search.censys.io/api/v1/account', auth=(censys_authid, censys_authsecret))
-    return censys_data.json()
-
-def zoomeyecheck():
-    zoomeye_authkey = os.getenv('ZOOMEYE_API_KEY')
-    zoomeye_data = requests.get('https://api.zoomeye.org/resources-info', headers={'API-KEY': zoomeye_authkey})
-    return zoomeye_data.json()
-    
-if __name__ == '__main__':
-    print('balance check')
-    print('---------------------')
-    print('################ fofa')
-    fofa_data = fofacheck()
-    print('coins: {}'.format(fofa_data['fcoin']))
-    print('points: {}'.format(fofa_data['fofa_point']))
-    print('remaining queries: {}'.format(fofa_data['remain_api_query']))
-    print('remaining data: {}'.format(fofa_data['remain_api_data']))
-    print('---------------------')
-    print('############## shodan')
-    sho_data = shodancheck()
-    print('scan credits: {}'.format(sho_data['scan_credits']))
-    print('query credits: {}'.format(sho_data['query_credits']))
-    print('---------------------')
-    print('########## binaryedge')
-    bin_data = binaryedgecheck()
-    print('credits: {}'.format(bin_data['requests_left']))
-    print('---------------------')
     print('############## censys')
-    queries_left = cenyscheck()['quota']['allowance'] - cenyscheck()['quota']['used']
+    queries_left = censys_data.json()['quota']['allowance'] - censys_data.json()['quota']['used']
     print('remaining queries: {}'.format(queries_left))
-    print('---------------------')
-    print('############# zoomeye')
-    print('remaining queries: {}'.format(zoomeyecheck()['quota_info']['remain_total_quota']))
-    print('---------------------')
+else:
+    log.error('CENSYS_API_ID missing')
