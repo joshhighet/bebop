@@ -3,6 +3,7 @@
 import os
 import sys
 import logging
+import asyncio
 import argparse
 
 import cryptocurrency
@@ -87,7 +88,9 @@ if args.target.startswith('https'):
     getcert_data = getcert.main(fqdn, port=targetport)
 title.main(requestobject)
 header_data = headers.main(requestobject)
-configcheck.main(args.target, usetor=torstate)
+loop = asyncio.get_event_loop()
+loop.run_until_complete(configcheck.main(args.target, usetor=torstate))
+loop.close()
 pagespider_data = pagespider.main(args.target, requestobject, usetor=torstate)
 favicon_data = favicon.main(url_base, requestobject, usetor=torstate)
 for item in pagespider_data['internal']:
