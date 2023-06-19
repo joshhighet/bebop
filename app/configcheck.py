@@ -115,7 +115,7 @@ interesting_paths = [
 
 async def fetch(location, path, session):
     uri = location + path['uri']
-    log.info('scanning %s - expecting %s', uri, path['code'])
+    log.debug('scanning %s - expecting %s', uri, path['code'])
     try:
         async with session.get(uri) as response:
             text = await response.text()
