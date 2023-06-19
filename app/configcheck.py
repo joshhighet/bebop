@@ -132,7 +132,8 @@ async def fetch(location, path, session):
             else:
                 log.debug(f'found {response.status} at {uri}')
     except Exception as e:
-        log.error(e)
+        log.error('error fetching %s - %s', uri, e)
+        logging.debug(traceback.format_exc())
 
 async def main(location, usetor=True, max_concurrent_requests=5):
     if location.endswith('/'):
