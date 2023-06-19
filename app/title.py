@@ -16,9 +16,6 @@ with open('common/http-titles.txt', 'r', encoding='utf-8') as common_titles_file
     common_titles_file.close()
 
 def main(requestobject, doshodan=True, docensys=True, dobedge=True, dozoome=True, dofofa=True):
-    if len(requestobject.text.splitlines()) == 1:
-        log.error('single line response, not parsing')
-        return None
     soup = BeautifulSoup(requestobject.text, 'html.parser')
     title = soup.find('title')
     if title is not None:
