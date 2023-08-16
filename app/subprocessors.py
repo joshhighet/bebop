@@ -25,6 +25,9 @@ if SHODAN_API_KEY:
     shodan_api = shodan.Shodan(SHODAN_API_KEY)
 
 def query_zoomeye(squery):
+    '''
+    https://www.zoomeye.org/doc?channel=api
+    '''
     findings = []
     if not ZOOMEYE_API_KEY:
         log.error("zoomeye: without an api key queries are skipped")
