@@ -17,6 +17,6 @@ ENV SOCKS_PORT=$SOCKS_PORT
 ENV SOCKS_HOST=$SOCKS_HOST
 ENV PYTHONUNBUFFERED True
 COPY . ./
-RUN pip3 install --no-cache-dir -r requirements.txt
+RUN pip3 install --break-system-packages --no-cache-dir -r requirements.txt
 
 ENTRYPOINT ["python3", "app"]
