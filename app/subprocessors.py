@@ -96,8 +96,11 @@ def query_censys(squery):
         results = censys_api.search(squery, per_page=30)
         total_results = len(results())
         log.info('censys: found %s results for %s', total_results, squery)
+        if total_results == 0:
+            log.warning('censys: no results found')
+            return findings
         if total_results <= 20:
-            for result in records():
+            for result in results():
                 findings.append(result)
                 log.debug('censys: found %s', result['ip'])
         else:
