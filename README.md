@@ -29,7 +29,8 @@ graph LR
     cryptoc[check for wallets]
     checks([/server-status\n/robots.txt\netc])
     anchor([input url]) -->mainget>get site content]
-    mainget --> fuzz[directory/file enumeration]
+    mainget --> catchallchk{catchall check}
+    catchallchk -- no --> fuzz[directory/file enumeration]
     fuzz -..-> fuzzlist
     fuzzlist -..-> fuzz
     anchor --> scan(port/service scan)
@@ -51,6 +52,7 @@ graph LR
     spider --> cryptoc
     cryptoc -..-> ifsupportedcoin[/if LTC/XMR/BTC/]
     ifsupportedcoin --> cryptocurrency
+
 ```
 
 # methods
@@ -72,7 +74,7 @@ graph LR
 
 you will need to make a Tor routable SOCKS5 proxy available to this image
 
-leverage any existing infrastructure, create your own or follow one of the below methods
+leverage any existing infrastructure, create your own (see [wiki.archlinux.org](https://wiki.archlinux.org/title/tor)) or follow one of the below methods
 
 1. create a simple single-relay proxy with [joshhighet/torsocc](https://github.com/joshhighet/torsocc/pkgs/container/torsocc)
 

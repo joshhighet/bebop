@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+import uuid
 import logging
 import asyncio
-from aiohttp import ClientSession, ClientTimeout
 from aiohttp import ClientSession, ClientTimeout
 from aiohttp_socks import ProxyConnector
 
@@ -11,6 +11,20 @@ log = logging.getLogger(__name__)
 
 import title
 from utilities import getsocks, useragentstr
+
+async def is_catch_all(session, location, attempts=3):
+    for _ in range(attempts):
+        random_path = "/" + str(uuid.uuid4())
+        uri = location + random_path
+        try:
+            log.debug('scanning %s as for catch-all validation', uri)
+            async with session.get(uri, timeout=10) as response:
+                if response.status != 200:  
+                    return False
+        except Exception as e:
+            log.error('error fetching %s - %s', uri, e)
+            return False
+    return True
 
 interesting_paths = [
     {'uri': '/server-status', 'code': 200, 'text': 'Apache'},
@@ -119,9 +133,6 @@ async def fetch(location, path, session):
     try:
         async with session.get(uri) as response:
             text = await response.text()
-            if '404' and 'Page not found' in text:
-                log.debug('this page looks like a 404 w/ the wrong status code!')
-                return
             if response.status == path['code']:
                 if path['text'] is None:
                     log.info(f'found {path["code"]} at {uri}')
@@ -133,7 +144,7 @@ async def fetch(location, path, session):
                 log.debug(f'found {response.status} at {uri}')
     except Exception as e:
         log.error('error fetching %s - %s', uri, e)
-        logging.debug(traceback.format_exc())
+        logging.debug(e)
 
 async def main(location, usetor=True, max_concurrent_requests=5):
     if location.endswith('/'):
@@ -148,6 +159,10 @@ async def main(location, usetor=True, max_concurrent_requests=5):
     sem = asyncio.Semaphore(max_concurrent_requests)
     connector = ProxyConnector.from_url(reqproxies.get('https')) if reqproxies else None
     async with ClientSession(headers={'User-Agent': useragentstr}, timeout=timeout, trust_env=True, connector=connector) as session:
+        catch_all_detected = await is_catch_all(session, location)
+        if catch_all_detected:
+            log.warning("catch-all response-code behavior detected - path-based checks will be skipped")
+            return
         tasks = []
         for path in interesting_paths:
             async with sem:
