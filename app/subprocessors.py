@@ -176,3 +176,17 @@ def query_fofa(squery):
     else:
         log.warning('fofa: more than 20 results found. skipping query as it is not deemed rare.')
     return findings
+
+def query_shodanindernetdb(ip):
+    '''
+    https://internetdb.shodan.io
+    '''
+    results = requests.get('https://internetdb.shodan.io/' + ip)
+    if results.status_code != 200:
+        log.error('shodanindernetdb: api error: %s - %s', results.status_code, results.text)
+        return None
+    results = results.json()
+    if not results['ports']:
+        log.warning('shodanindernetdb: no ports found')
+    else:
+        log.info('shodanindernetdb: found %s', results)
