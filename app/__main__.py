@@ -6,18 +6,17 @@ import logging
 import asyncio
 import argparse
 
-import cryptocurrency
-import getpage
-import headers
-import favicon
-import pagespider
-import title
-import portscan
-import configcheck
-import opendir
-import getcert
-import cliart
-from utilities import preflight, getfqdn, getbaseurl, validurl, getport
+import app.getpage as getpage
+import app.headers as headers
+import app.favicon as favicon
+import app.pagespider as pagespider
+import app.title as title
+import app.portscan as portscan
+import app.configcheck as configcheck
+import app.opendir as opendir
+import app.getcert as getcert
+import app.cliart as cliart
+from .utilities import preflight, getfqdn, getbaseurl, validurl, getport
 
 parser = argparse.ArgumentParser()
 parser.add_argument('target', help='target address')
@@ -31,7 +30,7 @@ parser.add_argument('--clearnet',
                     default=False)
 parser.add_argument('--useragent',
                     help='set user-agent',
-                    default='Mozilla/5.0 (Windows NT 10.0; rv:68.0) Gecko/20100101 Firefox/68.0')
+                    default='Mozilla/5.0 (Windows NT 10.0; rv:109.0) Gecko/20100101 Firefox/115.0')
 args = parser.parse_args()
 
 logging.basicConfig(
@@ -40,18 +39,19 @@ logging.basicConfig(
     datefmt="%I:%M:%S%p",
 )
 
-print(
-'''
-              __                     
-      _(\    |@@|                        __         __              
-     (__/\__ \--/ __                    / /_  ___  / /_  ____  ____ 
-        \___|----|  |   __             / __ \/ _ \/ __ \/ __ \/ __ \\
-            \ }{ /\ )_ / _\           / /_/ /  __/ /_/ / /_/ / /_/ /
-            /\__/\ \__O (__          /_.___/\___/_.___/\____/ .___/ 
-           (--/\--)    \__/                                /_/      
-           _)(  )(_                  
-          `---''---`                 hidden service safari 👀 🧅 💻 
-''')
+if len(sys.argv) == 1:
+    print(
+    '''
+                __                     
+        _(\    |@@|                        __         __              
+        (__/\__ \--/ __                    / /_  ___  / /_  ____  ____ 
+            \___|----|  |   __             / __ \/ _ \/ __ \/ __ \/ __ \\
+                \ }{ /\ )_ / _\           / /_/ /  __/ /_/ / /_/ / /_/ /
+                /\__/\ \__O (__          /_.___/\___/_.___/\____/ .___/ 
+            (--/\--)    \__/                                /_/      
+            _)(  )(_                  
+            `---''---`                 hidden service safari 👀 🧅 💻 
+    ''')
 
 cliart.prints()
 
@@ -91,9 +91,9 @@ header_data = headers.main(requestobject)
 loop = asyncio.get_event_loop()
 loop.run_until_complete(configcheck.main(args.target, usetor=torstate))
 loop.close()
-pagespider_data = pagespider.main(args.target, requestobject, usetor=torstate)
 favicon_data = favicon.main(url_base, requestobject, usetor=torstate)
-for item in pagespider_data['internal']:
+pagespider_data = pagespider.main(requestobject, usetor=torstate, skip_queryurl=True)
+for item in pagespider_data['samedomain']:
     itemsource = getpage.main(item)
     if itemsource is not None:
         opendir.main(itemsource)
