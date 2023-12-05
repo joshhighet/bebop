@@ -10,7 +10,6 @@ from bs4 import BeautifulSoup
 from .utilities import getsocks, useragentstr
 
 log = logging.getLogger(__name__)
-logging.basicConfig(level=logging.DEBUG)
 
 def get_links(soup, base_url):
     links = [link['href'] for link in soup.find_all('a', href=True)]
@@ -44,8 +43,7 @@ def main(siterequest, usetor, skip_queryurl):
     if skip_queryurl and '?' in url:
         log.error('this looks like a query url - skipping spider: %s', url)
         return None
-    base_url = urllib.parse.urlparse(url)  
-    print(base_url)
+    base_url = urllib.parse.urlparse(url)
     results = get_links(soup, base_url)
     log.info('found %s total links', sum(len(lst) for lst in results.values()))
     return results
