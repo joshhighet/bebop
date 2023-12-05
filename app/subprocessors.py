@@ -50,7 +50,7 @@ def query_zoomeye(squery):
     if total_results <= 20:
         for result in results_data['matches']:
             findings.append(result)
-            log.debug('zoomeye: found %s', result['ip'])
+            log.info('zoomeye: found %s', result['ip'])
             log.debug('zoomeye: %s', result['portinfo']['banner'])
     else:
         log.warning('zoomeye: more than 20 results found. skipping query as it is not deemed rare.')
@@ -79,7 +79,7 @@ def query_binaryedge(squery):
     if total_results <= 20:
         for result in results_data['events']:
             findings.append(result)
-            log.debug('binaryedge: found %s', result['target']['ip'])
+            log.info('binaryedge: found %s', result['target']['ip'])
             if 'response' in result['result']['data']:
                 log.debug('binaryedge: %s', result['result']['data']['response']['body']['content'])
             else:
@@ -105,7 +105,7 @@ def query_censys(squery):
         if total_results <= 20:
             for result in results():
                 findings.append(result)
-                log.debug('censys: found %s', result['ip'])
+                log.info('censys: found %s', result['ip'])
         else:
             log.warning('censys: more than 20 results found. skipping query as it is not deemed rare.')
     except CensysException as ce:
@@ -130,7 +130,7 @@ def query_shodan(squery):
         if total_results <= 20:
             for result in results['matches']:
                 findings.append(result)
-                log.debug('shodan: found %s', result['ip_str'])
+                log.found('shodan: found %s', result['ip_str'])
                 log.debug('shodan: %s', result['data'])
         else:
             log.warning('shodan: more than 20 results found. skipping query as it is not deemed rare.')
@@ -178,7 +178,7 @@ def query_fofa(squery):
     if total_results <= 20:
         for result in results_data['results']:
             findings.append(result)
-            log.debug('fofa: found %s', result)
+            log.info('fofa: found ' + str(result[0]))
     else:
         log.warning('fofa: more than 20 results found. skipping query as it is not deemed rare.')
     return findings
