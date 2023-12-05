@@ -34,7 +34,7 @@ def query_zoomeye(squery):
     '''
     findings = []
     if not ZOOMEYE_API_KEY:
-        log.error("zoomeye: without an api key queries are skipped")
+        log.warning("zoomeye: without an api key queries are skipped")
         return findings
     if not squery:
         log.error("zoomeye: no query provided")
@@ -63,7 +63,7 @@ def query_zoomeye(squery):
 def query_binaryedge(squery):
     findings = []
     if not BINARYEDGE_API_KEY:
-        log.error("binaryedge: without an api key queries are skipped")
+        log.warning("binaryedge: without an api key queries are skipped")
         return findings
     if not squery:
         log.error("binaryedge: no query provided")
@@ -96,7 +96,7 @@ def query_binaryedge(squery):
 def query_censys(squery):
     findings = []
     if not (CENSYS_API_ID and CENSYS_API_SECRET):
-        log.error("censys: without an api key queries are skipped")
+        log.warning("censys: without an api key queries are skipped")
         return findings
     try:
         log.debug('censys: querying %s', squery)
@@ -121,7 +121,7 @@ def query_censys(squery):
 def query_shodan(squery):
     findings = []
     if not SHODAN_API_KEY:
-        log.error("shodan: without an api key queries are skipped")
+        log.warning("shodan: without an api key queries are skipped")
         return findings
     if not squery:
         log.error("shodan: no query provided")
@@ -148,7 +148,7 @@ def query_fofa(squery):
     '''
     findings = []
     if not FOFA_API_KEY or not FOFA_API_MAIL:
-        log.error("fofa: without an api key and email queries are skipped")
+        log.warning("fofa: without an api key and email queries are skipped")
         return findings
     if not squery:
         log.error("fofa: no query provided")
@@ -202,6 +202,9 @@ def query_shodanindernetdb(ip):
         log.info('shodanindernetdb: found %s', results)
 
 def query_resolutions_securitytrails(ip_address):
+    if not SECURITYTRAILS_API_KEY:
+        log.warning("securitytrails: without an api key queries are skipped")
+        return set()
     url = f"https://api.securitytrails.com/v1/ips/nearby/{ip_address}"
     headers = {"apikey": SECURITYTRAILS_API_KEY}
     response = requests.get(url, headers=headers, timeout=10)
@@ -217,6 +220,9 @@ def query_resolutions_securitytrails(ip_address):
     return hostnames
 
 def query_resolutions_virustotal(ip_address):
+    if not VIRUSTOTAL_API_KEY:
+        log.warning("virustotal: without an api key queries are skipped")
+        return set()
     url = f"https://www.virustotal.com/api/v3/ip_addresses/{ip_address}/resolutions"
     headers = {"x-apikey": VIRUSTOTAL_API_KEY}
     response = requests.get(url, headers=headers, timeout=10)
@@ -232,6 +238,9 @@ def query_resolutions_virustotal(ip_address):
     return hostnames
 
 def query_resolutions_urlscan(ip_address):
+    if not URLSCAN_API_KEY:
+        log.warning("urlscan: without an api key queries are skipped")
+        return set()
     search_url = f'https://urlscan.io/api/v1/search/?q=ip:"{ip_address}"'
     headers = {
         'API-Key': URLSCAN_API_KEY,
