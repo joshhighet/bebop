@@ -33,5 +33,5 @@ def main(requestobject, doshodan=True, docensys=True, dobedge=True, dozoome=True
             if dofofa:
                 subprocessors.query_fofa('title=' + str(title.text))
         return title.text
-    log.error('no title found on page')
+    log.warning('failed to extract title from %s', requestobject.url)
     return None
