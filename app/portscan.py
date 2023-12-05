@@ -13,7 +13,7 @@ from utilities import gen_chainconfig
 log = logging.getLogger(__name__)
 
 def portdata(port):
-    log.debug('found port: %s', str(port['@portid']))
+    log.info('found port: %s', str(port['@portid']))
     portinf = {
         'port': port['@portid'],
         'name': None,
@@ -80,10 +80,13 @@ nmap -sT -PN -n -sV --open -oX - --top-ports %s \
         scanout['ports'] = []
         if isinstance(portarr, list):
             for port in portarr:
-                scanout['ports'].append(portdata(port))
-                log.info('found port: %s', str(port['@portid']))
+                pdata = portdata(port)
+                log.info(pdata)
+                scanout['ports'].append(pdata)
         else:
-            scanout['ports'].append(portdata(portarr))
+            pdata = portdata(portarr)
+            log.info(pdata)
+            scanout['ports'].append(pdata)
     else:
         log.info('no open ports discovered?')
         log.error(scanout)
