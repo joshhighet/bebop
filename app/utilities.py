@@ -43,7 +43,11 @@ path_checks = ['proxychains4','nmap']
 
 def checktcp(host, port):
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    result = sock.connect_ex((str(host), int(port)))
+    try:
+        result = sock.connect_ex((str(host), int(port)))
+    except socket.gaierror:
+        log.critical('failed to resolve %s', host)
+        sys.exit(1)
     sock.close()
     if result == 0:
         return True
