@@ -106,7 +106,7 @@ def preflight():
     for path_item in path_checks:
         check = shutil.which(path_item)
         if check is None:
-            log.critical('%f not found in path', path_item)
+            log.critical(str(path_item) + ' required and missing from PATH!')
             sys.exit(1)
     for file in file_checks:
         if not os.path.isfile(file):
