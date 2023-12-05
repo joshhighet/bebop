@@ -13,7 +13,7 @@ from .utilities import gen_chainconfig
 log = logging.getLogger(__name__)
 
 def portdata(port):
-    log.info('found port: %s', str(port['@portid']))
+    log.info('found open port: %s', str(port['@portid']) + '/' + port['@protocol'])
     portinf = {
         'port': port['@portid'],
         'name': None,
@@ -58,7 +58,7 @@ def portdata(port):
                 log.debug(script)
     return portinf
 
-def main(fqdn, useragent, usetor=True, max_scanport=10):
+def main(fqdn, useragent, usetor=True, max_scanport=20):
     command='\
 nmap -sT -PN -n -sV --open -oX - --top-ports %s \
 --version-intensity 4 --script ssh-hostkey,ssh-auth-methods,banner \
@@ -66,7 +66,7 @@ nmap -sT -PN -n -sV --open -oX - --top-ports %s \
     if usetor:
         gen_chainconfig()
         command = 'proxychains4 -f ../proxychains.conf ' + command
-    log.info('commencing portscan on %s', fqdn)
+    log.debug('commencing portscan on %s', fqdn)
     log.debug('command: %s', command)
     output = subprocess.run(command, shell=True, capture_output=True, text=True, check=True)
     scanout = json.loads(output.stdout)
