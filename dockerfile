@@ -19,4 +19,4 @@ ENV PYTHONUNBUFFERED True
 COPY . ./
 RUN pip3 install --break-system-packages --no-cache-dir -r requirements.txt
 
-ENTRYPOINT ["python3", "app"]
+ENTRYPOINT ["python3", "-m", "app"]
