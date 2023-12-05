@@ -10,13 +10,17 @@ from censys.common.exceptions import CensysException
 import shodan
 
 log = logging.getLogger(__name__)
-ZOOMEYE_API_KEY = os.getenv('ZOOMEYE_API_KEY', None)
-BINARYEDGE_API_KEY = os.getenv('BINARYEDGE_API_KEY', None)
-CENSYS_API_ID = os.getenv('CENSYS_API_ID', None)
-CENSYS_API_SECRET = os.getenv('CENSYS_API_SECRET', None)
-SHODAN_API_KEY = os.getenv('SHODAN_API_KEY', None)
+
 FOFA_API_KEY = os.getenv('FOFA_API_KEY', None)
+CENSYS_API_ID = os.getenv('CENSYS_API_ID', None)
 FOFA_API_MAIL = os.getenv('FOFA_API_MAIL', None)
+SHODAN_API_KEY = os.getenv('SHODAN_API_KEY', None)
+URLSCAN_API_KEY = os.getenv('URLSCAN_API_KEY', None)
+ZOOMEYE_API_KEY = os.getenv('ZOOMEYE_API_KEY', None)
+CENSYS_API_SECRET = os.getenv('CENSYS_API_SECRET', None)
+BINARYEDGE_API_KEY = os.getenv('BINARYEDGE_API_KEY', None)
+VIRUSTOTAL_API_KEY = os.getenv('VIRUSTOTAL_API_KEY', None)
+SECURITYTRAILS_API_KEY = os.getenv('SECURITYTRAILS_API_KEY', None)
 
 if CENSYS_API_SECRET and CENSYS_API_ID:
     censys_api = CensysHosts(api_id=CENSYS_API_ID, api_secret=CENSYS_API_SECRET)
@@ -130,7 +134,7 @@ def query_shodan(squery):
         if total_results <= 20:
             for result in results['matches']:
                 findings.append(result)
-                log.found('shodan: found %s', result['ip_str'])
+                log.info('shodan: found %s', result['ip_str'])
                 log.debug('shodan: %s', result['data'])
         else:
             log.warning('shodan: more than 20 results found. skipping query as it is not deemed rare.')
@@ -196,3 +200,51 @@ def query_shodanindernetdb(ip):
         log.warning('shodanindernetdb: no ports found')
     else:
         log.info('shodanindernetdb: found %s', results)
+
+def query_resolutions_securitytrails(ip_address):
+    url = f"https://api.securitytrails.com/v1/ips/nearby/{ip_address}"
+    headers = {"apikey": SECURITYTRAILS_API_KEY}
+    response = requests.get(url, headers=headers, timeout=10)
+    if response.status_code != 200:
+        logging.error(f"unhandled error: {response.status_code} - {response.text}")
+        return set()
+    data = response.json()
+    hostnames = set()
+    for block in data.get("blocks", []):
+        for hostname in block.get("hostnames", []):
+            hostnames.add(hostname)
+    logging.info(f"found {len(hostnames)} hostnames on SecurityTrails")
+    return hostnames
+
+def query_resolutions_virustotal(ip_address):
+    url = f"https://www.virustotal.com/api/v3/ip_addresses/{ip_address}/resolutions"
+    headers = {"x-apikey": VIRUSTOTAL_API_KEY}
+    response = requests.get(url, headers=headers, timeout=10)
+    if response.status_code != 200:
+        logging.error(f"unhandled error: {response.status_code} - {response.text}")
+        return set()
+    data = response.json()
+    hostnames = set()
+    for item in data.get("data", []):
+        if 'attributes' in item and 'host_name' in item['attributes']:
+            hostnames.add(item['attributes']['host_name'])
+    logging.info(f"found {len(hostnames)} hostnames on VirusTotal")
+    return hostnames
+
+def query_resolutions_urlscan(ip_address):
+    search_url = f'https://urlscan.io/api/v1/search/?q=ip:"{ip_address}"'
+    headers = {
+        'API-Key': URLSCAN_API_KEY,
+        'Content-Type': 'application/json'
+    }
+    response = requests.get(search_url, headers=headers, timeout=10)
+    if response.status_code != 200:
+        logging.error(f"unhandled error: {response.status_code} - {response.text}")
+        return set()
+    data = response.json()
+    hostnames = set()
+    for item in data.get('results', []):
+        if 'task' in item and 'domain' in item['task']:
+            hostnames.add(item['task']['domain'])
+    logging.info(f"found {len(hostnames)} hostnames on urlscan.io")
+    return hostnames
