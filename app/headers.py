@@ -21,7 +21,7 @@ def main(siterequest, doshodan=True, docensys=True, dobedge=True, dozoome=True, 
     }
     for hedr in siterequest.headers:
         if hedr.lower() not in common_headers:
-            log.info('header: ' + hedr + ' ' + siterequest.headers[hedr])
+            log.info('interesting header: "' + hedr + ': ' + siterequest.headers[hedr] + '"')
             if hedr.lower() == 'set-cookie':
                 data['cookies'].append(siterequest.headers[hedr])
                 continue
