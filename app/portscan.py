@@ -72,7 +72,7 @@ nmap -sT -PN -n -sV --open -oX - --top-ports %s \
     scanout = json.loads(output.stdout)
     scanout['args'] = scanout['nmaprun']['@args']
     if 'host' not in scanout['nmaprun']:
-        log.debug('no open ports')
+        log.info('no open ports discovered?')
         return scanout
     portarr = scanout['nmaprun']['host']['ports']['port']
     log.debug(scanout['nmaprun']['@args'])
@@ -85,7 +85,7 @@ nmap -sT -PN -n -sV --open -oX - --top-ports %s \
         else:
             scanout['ports'].append(portdata(portarr))
     else:
-        log.info('err, no open ports found?')
+        log.info('no open ports discovered?')
         log.error(scanout)
     scanout['time'] = int(float(scanout['nmaprun']['runstats']['finished']['@elapsed']))
     log.debug(scanout)
