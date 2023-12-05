@@ -7,8 +7,8 @@ import hashlib
 from bs4 import BeautifulSoup
 from urllib.parse import urljoin
 
-import getpage
-import subprocessors
+import app.getpage as getpage
+import app.subprocessors as subprocessors
 
 log = logging.getLogger(__name__)
 

@@ -3,7 +3,7 @@
 import logging
 import requests
 
-from utilities import getsocks, useragentstr
+from .utilities import getsocks, useragentstr
 
 log = logging.getLogger(__name__)
 requests.packages.urllib3.disable_warnings()

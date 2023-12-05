@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 import logging
 
-import subprocessors
+import app.subprocessors as subprocessors
 
 log = logging.getLogger(__name__)
 

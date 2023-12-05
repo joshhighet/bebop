@@ -9,8 +9,8 @@ from OpenSSL import SSL
 from cryptography import x509
 from cryptography.x509.oid import NameOID
 
-import subprocessors
-from utilities import getproxyvalue
+import app.subprocessors as subprocessors
+from .utilities import getproxyvalue
 
 sockshost = getproxyvalue()[0]
 socksport = getproxyvalue()[1]

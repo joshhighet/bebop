@@ -4,7 +4,7 @@ import logging
 import warnings
 from bs4 import BeautifulSoup
 
-import subprocessors
+import app.subprocessors as subprocessors
 
 log = logging.getLogger(__name__)
 warnings.filterwarnings("ignore", category=UserWarning, module='bs4')
