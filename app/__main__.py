@@ -16,6 +16,7 @@ import app.configcheck as configcheck
 import app.opendir as opendir
 import app.getcert as getcert
 import app.cliart as cliart
+import app.cryptocurrency as cryptocurrency
 from .utilities import preflight, getfqdn, getbaseurl, validurl, getport
 
 parser = argparse.ArgumentParser()
@@ -77,6 +78,7 @@ if fqdn.endswith('.onion'):
         sys.exit(1)
 url_base = getbaseurl(args.target)
 logging.debug('target: %s url_base: %s fqdn: %s', args.target, url_base, fqdn)
+
 requestobject = getpage.main(args.target, usetor=torstate)
 if requestobject is None:
     logging.error('failed to retrieve page')
@@ -86,6 +88,7 @@ if requestobject.status_code != 200:
 if args.target.startswith('https'):
     targetport = getport(args.target)
     getcert_data = getcert.main(fqdn, port=targetport)
+
 title.main(requestobject)
 header_data = headers.main(requestobject)
 loop = asyncio.get_event_loop()
@@ -93,8 +96,10 @@ loop.run_until_complete(configcheck.main(args.target, usetor=torstate))
 loop.close()
 favicon_data = favicon.main(url_base, requestobject, usetor=torstate)
 pagespider_data = pagespider.main(requestobject, usetor=torstate, skip_queryurl=True)
+cryptocurrency_data = cryptocurrency.main(requestobject.text)
 for item in pagespider_data['samedomain']:
     itemsource = getpage.main(item)
     if itemsource is not None:
         opendir.main(itemsource)
+        cryptocurrency.main(requestobject.text)
 portscan.main(fqdn, useragent=args.useragent, usetor=torstate)
