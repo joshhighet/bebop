@@ -38,6 +38,8 @@ def main(siterequest, doshodan=True, docensys=True, dobedge=True, dozoome=True, 
             data['interesting_headers'].append(hedr + ':' + siterequest.headers[hedr])
         else:
             log.debug('header: ' + hedr + ' ' + siterequest.headers[hedr])
+    if 'cf-mitigated' in data['interesting_headers'] and 'cloudflare' in data['server'].lower():
+        log.warning('requests are likely getting challenged by cloudflare!')
     if data['etag'] is not None:
         if doshodan:
             subprocessors.query_shodan(data['etag'])
