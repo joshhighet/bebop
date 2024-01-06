@@ -186,7 +186,7 @@ _at build time you can inject a custom proxy location with `SOCKS_HOST` & `SOCKS
 
 ```shell
 git clone https://github.com/joshhighet/bebop
-docker build --build-arg SOCKS_HOST=10.20.30.40 --build-arg SOCKS_PORT=8080 bebop -t bebop
+docker build --build-arg SOCKS_HOST=127.0.0.1 --build-arg SOCKS_PORT=9050 bebop -t bebop
 ```
 
 # running

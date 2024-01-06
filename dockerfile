@@ -12,7 +12,7 @@ RUN apt update --yes
 RUN apt install --yes proxychains-ng nmap python3-pip jq
 
 ARG SOCKS_PORT=9050
-ARG SOCKS_HOST=10.4.4.4
+ARG SOCKS_HOST=127.0.0.1
 ENV SOCKS_PORT=$SOCKS_PORT
 ENV SOCKS_HOST=$SOCKS_HOST
 ENV PYTHONUNBUFFERED True
