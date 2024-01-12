@@ -54,7 +54,8 @@ if len(sys.argv) == 1:
             `---''---`                 hidden service safari 👀 🧅 💻 
     ''')
 
-cliart.prints()
+if os.environ.get('GITHUB_ACTIONS') is None:
+    cliart.prints()
 
 if args.clearnet is True:
     logging.critical('clearnet routing enabled..')
