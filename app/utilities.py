@@ -45,6 +45,7 @@ def checktcp(host, port):
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     try:
         result = sock.connect_ex((str(host), int(port)))
+        log.debug('socket check result: %s', result)
     except socket.gaierror:
         log.critical('failed to resolve %s', host)
         sys.exit(1)
