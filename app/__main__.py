@@ -93,7 +93,7 @@ if args.target.startswith('https'):
 title.main(requestobject)
 header_data = headers.main(requestobject)
 loop = asyncio.get_event_loop()
-loop.run_until_complete(configcheck.main(args.target, usetor=torstate))
+loop.run_until_complete(configcheck.main(url_base, usetor=torstate))
 loop.close()
 favicon_data = favicon.main(url_base, requestobject, usetor=torstate)
 pagespider_data = pagespider.main(requestobject, usetor=torstate, skip_queryurl=True)
