@@ -104,7 +104,6 @@ def query_censys(squery):
         total_results = len(results())
         log.info('censys: found %s results for %s', total_results, squery)
         if total_results == 0:
-            log.warning('censys: no results found')
             return findings
         if total_results <= 20:
             for result in results():
