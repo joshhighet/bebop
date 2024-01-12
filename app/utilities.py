@@ -56,9 +56,6 @@ def checktcp(host, port):
 
 def gen_chainconfig():
     proxy = getproxyvalue()
-    if not checktcp(proxy[0], proxy[1]):
-        log.critical('failed socks5 preflight socket check (%s:%s)', proxy[0], proxy[1])
-        sys.exit(1)
     fqdnrex = re.compile(r'^[a-zA-Z0-9\-\.]+\.[a-zA-Z]{2,5}$')
     if fqdnrex.match(proxy[0]):
         socksaddr = nsresolve(proxy[0])
@@ -94,9 +91,6 @@ def getbaseurl(url):
 
 def getsocks(aio_fmt=False):
     proxy = getproxyvalue()
-    if not checktcp(proxy[0], proxy[1]):
-        log.critical('failed socks5 preflight socket check (%s:%s)', proxy[0], proxy[1])
-        sys.exit(1)
     if aio_fmt:
         proto = 'socks5'
     else:
