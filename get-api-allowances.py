@@ -18,11 +18,11 @@ else:
 if os.getenv('BINARYEDGE_API_KEY', None) != None:
     binaryedge_authkey = os.getenv('BINARYEDGE_API_KEY')
     binaryedge_data = requests.get('https://api.binaryedge.io/v2/user/subscription', headers={'X-Key': binaryedge_authkey})
-    requests_left = binaryedge_data.json()['requests_left']
+    requests_used = binaryedge_data.json()['requests_left']  # Actually contains used count
     requests_plan = binaryedge_data.json()['requests_plan']
-    remaining_requests = requests_plan - requests_left
+    remaining_requests = requests_plan - requests_used
     print('############## BinaryEdge')
-    print(f"used {requests_left} out of {requests_plan} available credits - {remaining_requests} remaining")
+    print(f"used {requests_used} out of {requests_plan} available credits - {remaining_requests} remaining")
 else:
     log.error('BINARYEDGE_API_KEY missing')
 
