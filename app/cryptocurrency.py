@@ -7,7 +7,7 @@ from bs4 import BeautifulSoup
 log = logging.getLogger(__name__)
 
 rex = {
-    'btc': re.compile(r'(bc1q[A-Za-z0-9]{39})|(([13]|bc1)[A-HJ-NP-Za-km-z1-9]{27,34}(?![A-Za-z0-9]))'),
+    'btc': re.compile(r'\b(bc1[ac-hj-np-z02-9]{39,59}|[13][a-km-zA-HJ-NP-Z1-9]{25,34})\b'),
     'xmr': re.compile(r'([0-9AB]{1})([0-9a-zA-Z]{93})'),
     'eth': re.compile(r'0x[a-fA-F0-9]{40}')
 }
