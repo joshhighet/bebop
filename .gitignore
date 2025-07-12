@@ -1,5 +1,4 @@
 **.pyc
 **.DS_Store
-venv/
 *.dump
 app/.env
