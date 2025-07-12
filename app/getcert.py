@@ -52,22 +52,24 @@ def get_subject(cert):
     except x509.ExtensionNotFound:
         return None
 
-def main(fqdn, port, usetor=True, doshodan=True, docensys=True, dobedge=True, dozoome=True, dofofa=True):
+def main(fqdn, port, usetor=True, doshodan=True, docensys=True, dozoome=True, dofofa=True):
     if port is None:
         logging.debug('port not specified, defaulting to 443')
         port = 443
     hostname_idna = idna.encode(fqdn)
-    sock = socket.socket()
-    if usetor is True:
+    if usetor:
         log.debug('using tor proxy - %s:%s', sockshost, socksport)
-        socks.setdefaultproxy(socks.PROXY_TYPE_SOCKS5, sockshost, socksport)
+        socks.set_default_proxy(socks.PROXY_TYPE_SOCKS5, sockshost, socksport)
+        sock = socks.socksocket()
+    else:
+        sock = socket.socket()
     try:
         log.debug('connecting to %s:%s', fqdn, port)
+        sock.settimeout(10)
         sock.connect((fqdn, port))
-    except socket.gaierror:
-        if fqdn.endswith('.onion') is False:
-            logging.error('unable to resolve hostname: %s', fqdn)
-            return None
+    except Exception as e:
+        logging.error('connection error: %s', e)
+        return None
     ctx = SSL.Context(SSL.SSLv23_METHOD)
     ctx.check_hostname = False
     ctx.verify_mode = SSL.VERIFY_NONE
@@ -91,8 +93,6 @@ def main(fqdn, port, usetor=True, doshodan=True, docensys=True, dobedge=True, do
         if docensys is True:
             querystr = 'services.tls.certificates.leaf_data.subject.serial_number:"' + str(crypto_cert.serial_number) + '"'
             subprocessors.query_censys(querystr)
-        if dobedge is True:
-            subprocessors.query_binaryedge('ssl.cert.serial:"' + str(crypto_cert.serial_number) + '"')
         if dozoome is True:
             subprocessors.query_zoomeye('ssl.cert.serial:"' + str(crypto_cert.serial_number) + '"')
         if dofofa is True:

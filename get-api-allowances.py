@@ -15,17 +15,6 @@ if os.getenv('ZOOMEYE_API_KEY', None) != None:
 else:
     log.error('ZOOMEYE_API_KEY missing')
 
-if os.getenv('BINARYEDGE_API_KEY', None) != None:
-    binaryedge_authkey = os.getenv('BINARYEDGE_API_KEY')
-    binaryedge_data = requests.get('https://api.binaryedge.io/v2/user/subscription', headers={'X-Key': binaryedge_authkey})
-    requests_used = binaryedge_data.json()['requests_left']  # Actually contains used count
-    requests_plan = binaryedge_data.json()['requests_plan']
-    remaining_requests = requests_plan - requests_used
-    print('############## BinaryEdge')
-    print(f"used {requests_used} out of {requests_plan} available credits - {remaining_requests} remaining")
-else:
-    log.error('BINARYEDGE_API_KEY missing')
-
 if os.getenv('FOFA_API_KEY', None) != None:
     fofa_authkey = os.getenv('FOFA_API_KEY')
     fofa_authmail = os.getenv('FOFA_API_MAIL')

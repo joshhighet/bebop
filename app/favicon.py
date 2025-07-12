@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 import mmh3
+import base64
 import codecs
 import logging
 import hashlib
@@ -39,8 +40,13 @@ def extract_favicon_url(domain, soup):
     try:
         icon_link = soup.find("link", rel=lambda x: x and x.lower() in ["shortcut icon", "icon"])
         if icon_link and icon_link["href"].startswith('data:image/'):
-            favicon64 = icon_link["href"].split(',')[1]
-            return favicon64, None
+            favicon_str = icon_link["href"].split(',')[1]
+            try:
+                favicon64 = base64.b64decode(favicon_str)
+                return favicon64, None
+            except base64.binascii.Error:
+                log.warning("Invalid base64 in inline favicon")
+                return None, None
         elif icon_link:
             return None, urljoin(domain, icon_link["href"])
         return None, urljoin(domain, '/favicon.ico')
@@ -78,7 +84,7 @@ def process_favicon(domain, requestobject, usetor=True):
         log.error("error processing favicon for %s: %s", domain, e)
     return None, None
 
-def main(domain, requestobject, doshodan=True, usetor=True, docensys=True, dobedge=True, dozoome=True, dofofa=True):
+def main(domain, requestobject, doshodan=True, usetor=True, docensys=True, dozoome=True, dofofa=True):
     faviconmmh3, faviconmd5 = process_favicon(domain, requestobject, usetor)
     if faviconmmh3 is None:
         return
@@ -89,8 +95,6 @@ def main(domain, requestobject, doshodan=True, usetor=True, docensys=True, dobed
         subprocessors.query_shodan('http.favicon.hash:' + str(faviconmmh3))
     if docensys is True:
         subprocessors.query_censys('services.http.response.favicons.md5_hash:' + str(faviconmd5))
-    if dobedge is True:
-        subprocessors.query_binaryedge('web.favicon.mmh3:"' + str(faviconmmh3) + '"')
     if dozoome is True:
         subprocessors.query_zoomeye('iconhash:' + str(faviconmmh3))
     if dofofa is True:

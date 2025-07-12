@@ -18,7 +18,6 @@ SHODAN_API_KEY = os.getenv('SHODAN_API_KEY', None)
 URLSCAN_API_KEY = os.getenv('URLSCAN_API_KEY', None)
 ZOOMEYE_API_KEY = os.getenv('ZOOMEYE_API_KEY', None)
 CENSYS_API_SECRET = os.getenv('CENSYS_API_SECRET', None)
-BINARYEDGE_API_KEY = os.getenv('BINARYEDGE_API_KEY', None)
 VIRUSTOTAL_API_KEY = os.getenv('VIRUSTOTAL_API_KEY', None)
 SECURITYTRAILS_API_KEY = os.getenv('SECURITYTRAILS_API_KEY', None)
 
@@ -58,39 +57,6 @@ def query_zoomeye(squery):
             log.debug('zoomeye: %s', result['portinfo']['banner'])
     else:
         log.warning('zoomeye: more than 20 results found. skipping query as it is not deemed rare.')
-    return findings
-
-def query_binaryedge(squery):
-    findings = []
-    if not BINARYEDGE_API_KEY:
-        log.warning("binaryedge: without an api key queries are skipped")
-        return findings
-    if not squery:
-        log.error("binaryedge: no query provided")
-        return findings
-    log.debug('binaryedge: querying %s', squery)
-    try:
-        results = requests.get('https://api.binaryedge.io/v2/query/search',
-                               params={'query': squery},
-                               headers={'X-Key': BINARYEDGE_API_KEY})
-        results.raise_for_status()
-    except requests.exceptions.RequestException as e:
-        log.error('binaryedge: api error: %s', e)
-        return findings
-    results_data = results.json()
-    total_results = results_data['total']
-    log.info('binaryedge: found %s results for %s', total_results, squery)
-    if total_results <= 20:
-        for result in results_data['events']:
-            findings.append(result)
-            log.info('binaryedge: found %s', result['target']['ip'])
-            if 'response' in result['result']['data']:
-                log.debug('binaryedge: %s', result['result']['data']['response']['body']['content'])
-            else:
-                log.debug('binaryedge: response key not found in result')
-
-    else:
-        log.warning('binaryedge: more than 20 results found. skipping query as it is not deemed rare.')
     return findings
 
 def query_censys(squery):
@@ -224,17 +190,23 @@ def query_resolutions_virustotal(ip_address):
         return set()
     url = f"https://www.virustotal.com/api/v3/ip_addresses/{ip_address}/resolutions"
     headers = {"x-apikey": VIRUSTOTAL_API_KEY}
-    response = requests.get(url, headers=headers, timeout=10)
-    if response.status_code != 200:
-        logging.error(f"unhandled error: {response.status_code} - {response.text}")
+    try:
+        response = requests.get(url, headers=headers, timeout=10)
+        response.raise_for_status()
+        data = response.json()
+        hostnames = set()
+        if 'data' in data:
+            for item in data['data']:
+                if 'attributes' in item and 'host_name' in item['attributes']:
+                    hostnames.add(item['attributes']['host_name'])
+        logging.info(f"found {len(hostnames)} hostnames on VirusTotal")
+        return hostnames
+    except requests.RequestException as e:
+        logging.error(f"VirusTotal API error: {e}")
         return set()
-    data = response.json()
-    hostnames = set()
-    for item in data.get("data", []):
-        if 'attributes' in item and 'host_name' in item['attributes']:
-            hostnames.add(item['attributes']['host_name'])
-    logging.info(f"found {len(hostnames)} hostnames on VirusTotal")
-    return hostnames
+    except (KeyError, TypeError) as e:
+        logging.error(f"Unexpected response structure from VirusTotal: {e}")
+        return set()
 
 def query_resolutions_urlscan(ip_address):
     if not URLSCAN_API_KEY:
