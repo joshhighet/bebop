@@ -3,7 +3,6 @@ mmh3
 lxml
 shodan
 censys
-pytest
 pyOpenSSL
 tldextract
 aiohttp_socks
