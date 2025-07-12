@@ -102,5 +102,9 @@ for item in pagespider_data['samedomain']:
     itemsource = getpage.main(item)
     if itemsource is not None:
         opendir.main(itemsource)
-        cryptocurrency.main(requestobject.text)
-portscan.main(fqdn, useragent=args.useragent, usetor=torstate)
+        cryptocurrency.main(itemsource.text)
+portscan_data = portscan.main(fqdn, useragent=args.useragent, usetor=torstate)
+if portscan_data and portscan_data.get('ports'):
+    logging.info(f"found {len(portscan_data['ports'])} open ports")
+    # wip: feed to subprocessors or finddomains if IP discovered
+    # use finddomains.main(resolved_ip)
