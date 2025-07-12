@@ -281,9 +281,3 @@ shodan stats --facets ssl.cert.serial:2000 port:443,8443 \
 | sed '/Top/d' \
 > common/ssl-serials.txt
 ```
-
-testcases are a work in progress but can be ran with 
-
-```shell
-python3 -m unittest discover -s tests
-```
