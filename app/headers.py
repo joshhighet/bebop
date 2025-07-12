@@ -12,7 +12,7 @@ with open('common/headers.txt', 'r', encoding='utf-8') as common_headers_file:
         common_headers.append(line.strip())
     common_headers_file.close()
 
-def main(siterequest, doshodan=True, docensys=True, dobedge=True, dozoome=True, dofofa=True):
+def main(siterequest, doshodan=True, docensys=True, dozoome=True, dofofa=True):
     data = {
         'etag': None,
         'server': None,
@@ -45,8 +45,6 @@ def main(siterequest, doshodan=True, docensys=True, dobedge=True, dozoome=True, 
             subprocessors.query_shodan(data['etag'])
         if docensys:
             subprocessors.query_censys(data['etag'])
-        if dobedge:
-            subprocessors.query_binaryedge(data['etag'])
         if dozoome:
             subprocessors.query_zoomeye(data['etag'])
         if dofofa:
